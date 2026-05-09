@@ -64,6 +64,7 @@ import { onMounted } from 'vue';
 const props = defineProps({
     token:  { type: String, required: true },
     errors: { type: Object, default: () => ({}) },
+    user:   { type: Object, default: null }, // Passed explicitly now
 });
 
 const page = usePage();
@@ -75,7 +76,12 @@ const form = useForm({
 });
 
 onMounted(() => {
-    if (page.props.auth?.user) {
+    // If the explicit user prop contains data, use it (since it has the phone number)
+    if (props.user) {
+        form.name = props.user.name || '';
+        form.email = props.user.email || '';
+        form.phone = props.user.phone || '';
+    } else if (page.props.auth?.user) {
         form.name = page.props.auth.user.name || '';
         form.email = page.props.auth.user.email || '';
         form.phone = page.props.auth.user.phone || '';

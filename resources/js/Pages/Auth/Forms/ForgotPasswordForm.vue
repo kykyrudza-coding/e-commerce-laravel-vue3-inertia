@@ -1,68 +1,67 @@
 <template>
-    <div class="h-screen flex items-center justify-center">
-        <div class="bg-white w-[35rem] rounded-lg shadow-2xl">
-            <form @submit.prevent="handleForm" class="p-10">
-                <!-- Headline -->
-                <Headline text="Введіть свою пошту" />
-                <Headline class="text-xl !text-left" text="Введіть свою пошту аби ми могли надіслати вам повідомлення для скидання паролю" />
-
-                <!-- Email input -->
-                <InputWithIcon
-                    v-model="form.email"
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="name@domain.com"
-                    :error="errors.email"
-                >
-                    <template #icon>
-                        <i class="ri-mail-line"></i>
-                    </template>
-                </InputWithIcon>
-
-                <div class="flex mt-7 mb-5">
-                    <BasicButton text="Надіслати повідомлення" type="submit"/>
+    <Head title="Відновлення паролю" />
+    <AuthLayout>
+        <div class="w-full max-w-md animate-slide-up">
+            <div class="card p-8">
+                <div class="mb-8">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-50 text-brand-500 flex items-center justify-center mb-4">
+                        <i class="ri-mail-send-line text-2xl"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-surface-900 mb-1">Відновити пароль</h1>
+                    <p class="text-sm text-surface-500">Введіть email — надішлемо посилання для скидання паролю.</p>
                 </div>
-            </form>
+
+                <!-- Success message -->
+                <div v-if="status" class="mb-5 p-3 rounded-xl bg-emerald-50 text-emerald-700 text-sm flex items-center gap-2">
+                    <i class="ri-check-circle-line text-lg"></i>
+                    {{ status }}
+                </div>
+
+                <form @submit.prevent="submit" class="space-y-4">
+                    <div>
+                        <label for="forgot-email" class="block text-sm font-medium text-surface-700 mb-1.5">Email</label>
+                        <div class="relative">
+                            <i class="ri-mail-line absolute left-3.5 top-1/2 -translate-y-1/2 text-surface-400"></i>
+                            <input
+                                id="forgot-email"
+                                v-model="form.email"
+                                type="email"
+                                autocomplete="email"
+                                placeholder="name@example.com"
+                                :class="['input pl-10', form.errors.email && 'input-error']"
+                            />
+                        </div>
+                        <p v-if="form.errors.email" class="mt-1.5 text-xs text-red-500">{{ form.errors.email }}</p>
+                    </div>
+
+                    <button type="submit" :disabled="form.processing" class="btn-primary w-full btn-lg justify-center" id="forgot-password-submit-btn">
+                        <i v-if="form.processing" class="ri-loader-4-line animate-spin"></i>
+                        {{ form.processing ? 'Надсилаємо...' : 'Надіслати посилання' }}
+                    </button>
+                </form>
+
+                <p class="mt-6 text-center text-sm text-surface-500">
+                    <Link :href="route('login')" class="text-brand-600 hover:text-brand-700 font-medium">
+                        <i class="ri-arrow-left-line"></i>
+                        Повернутись до входу
+                    </Link>
+                </p>
+            </div>
         </div>
-    </div>
+    </AuthLayout>
 </template>
 
-<script>
+<script setup>
 import { useForm } from '@inertiajs/vue3';
-import InputWithIcon from "../../../Components/Forms/InputWithIcon.vue";
-import Headline from "../../../Components/Forms/Headline.vue";
-import BasicButton from "../../../Components/Forms/BasicButton.vue";
-import FormLayout from "@/Layouts/FormLayout.vue";
+import AuthLayout from '@/Layouts/AuthLayout.vue';
 
-export default {
-    components: {
-        InputWithIcon,
-        Headline,
-        BasicButton,
-        FormLayout
-    },
-    layout: FormLayout,
-    props: {
-        errors: {
-            type: Object,
-            default: () => ({})
-        }
-    },
-    data() {
-        return {
-            form: useForm({
-                email: '',
-            })
-        };
-    },
-    methods: {
-        handleForm() {
-            this.form.post(route('password.email'), {
-                preserveState: true,
-                preserveScroll: true
-            });
-        }
-    }
-};
+defineOptions({ layout: null });
+
+defineProps({
+    status: { type: String, default: null },
+    errors: { type: Object, default: () => ({}) },
+});
+
+const form = useForm({ email: '' });
+const submit = () => form.post(route('password.email'));
 </script>

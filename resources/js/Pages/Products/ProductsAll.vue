@@ -1,106 +1,114 @@
 <template>
-    <div>
-        <div class="flex py-4 transition-all duration-500 gap-x-5">
+    <Head title="Каталог товарів" />
 
-            <div class="transition-all duration-500 ease-in-out lg:block hidden"
-                 :style="filtersVisible ? 'width: 356px;' : 'width: 0px;'">
-                <FiltersBlock v-if="filtersVisible" :filtersOptions="filtersOptions" @filter-applied="handleFilterApplied" @filter-updated="handleFilterUpdated" />
-            </div>
+    <div class="container-app py-8">
+        <!-- Breadcrumb -->
+        <nav class="flex items-center gap-2 text-sm text-surface-400 mb-6" aria-label="Breadcrumb">
+            <Link :href="route('home')" class="hover:text-surface-600 transition-colors">Головна</Link>
+            <i class="ri-arrow-right-s-line"></i>
+            <span class="text-surface-700 font-medium">Каталог</span>
+        </nav>
 
-            <div class="flex-grow transition-all duration-500 ease-in-out"
-                 :style="filtersVisible ? 'width: calc(100% - 256px);' : 'width: 100%;'">
-                <ProductSectionAllProducts
-                    :toggleFilters="toggleFilters"
-                    :domain="domain"
-                    :showFilter="true"
+        <h1 class="page-title mb-1">Каталог товарів</h1>
+        <p class="page-subtitle mb-8">Знайдіть ідеальний пристрій для вас</p>
+
+        <div class="flex gap-6">
+            <!-- Sidebar filters (desktop) -->
+            <aside
+                class="hidden lg:block flex-shrink-0 transition-all duration-300 overflow-hidden"
+                :style="filtersVisible ? 'width: 280px; opacity: 1' : 'width: 0; opacity: 0'"
+                aria-label="Фільтри"
+            >
+                <div class="card sticky top-20">
+                    <ProductFilters :filters-options="filtersOptions" />
+                </div>
+            </aside>
+
+            <!-- Main content -->
+            <div class="flex-1 min-w-0">
+                <ProductGrid
                     :products="products"
+                    :domain="domain"
+                    :show-filter="true"
+                    @toggle-filters="toggleFilters"
                 />
-                <Pagination :current-page="currentPage"
-                            :last-page="lastPage"
-                            :total="total"
-                            :per-page="perPage"
-                            @page-changed="handlePageChange" />
-            </div>
-        </div>
-
-        <div class="lg:hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50"
-             v-if="burgerMenuVisible" @click="closeBurgerMenu">
-            <div class="absolute top-0 left-0 bg-white w-80 h-full overflow-y-auto"
-                 @click.stop>
-                <FiltersBlock v-if="filtersVisible" :filtersOptions="filtersOptions" @filter-applied="handleFilterApplied" @filter-updated="handleFilterUpdated" />
+                <AppPagination
+                    :current-page="currentPage"
+                    :last-page="lastPage"
+                    :total="total"
+                    :per-page="perPage"
+                    @page-changed="handlePageChange"
+                />
             </div>
         </div>
     </div>
+
+    <!-- Mobile filter drawer -->
+    <Teleport to="body">
+        <Transition name="drawer">
+            <div
+                v-if="mobileFiltersOpen"
+                class="fixed inset-0 z-50 lg:hidden"
+                @click.self="mobileFiltersOpen = false"
+            >
+                <div class="absolute inset-0 bg-surface-950/50 backdrop-blur-sm"></div>
+                <div class="absolute left-0 top-0 bottom-0 w-80 bg-white shadow-2xl overflow-y-auto">
+                    <div class="flex items-center justify-between p-4 border-b border-surface-100">
+                        <h2 class="font-semibold text-surface-900">Фільтри</h2>
+                        <button @click="mobileFiltersOpen = false" class="btn-icon">
+                            <i class="ri-close-line text-lg"></i>
+                        </button>
+                    </div>
+                    <ProductFilters :filters-options="filtersOptions" />
+                </div>
+            </div>
+        </Transition>
+    </Teleport>
 </template>
 
-<script>
-import FiltersBlock from "@/Components/Products/Filters/FiltersBlock.vue";
-import ProductSectionAllProducts from "@/Components/Products/ProductSection/ProductSectionAllProducts.vue";
-import Pagination from "@/Components/Products/Pagination/Pagination.vue";
+<script setup>
+import { ref } from 'vue';
+import { router } from '@inertiajs/vue3';
+import ProductGrid from '@/Components/Products/ProductGrid.vue';
+import ProductFilters from '@/Components/Products/ProductFilters.vue';
+import AppPagination from '@/Components/Products/AppPagination.vue';
 
-export default {
-    name: "ProductsAll",
-    components: {
-        Pagination,
-        FiltersBlock,
-        ProductSectionAllProducts
-    },
-    props: {
-        products: {
-            type: Array,
-            required: true,
-        },
-        domain: String,
-        currentPage: Number,
-        lastPage: Number,
-        total: Number,
-        perPage: Number,
-        filtersOptions: {
-            type: Object,
-            required: true
-        }
-    },
-    data() {
-        return {
-            filtersVisible: true,
-            burgerMenuVisible: false,
-        };
-    },
-    methods: {
-        toggleFilters() {
-            if (window.innerWidth < 1024) {
-                this.burgerMenuVisible = !this.burgerMenuVisible;
-                this.toggleBodyOverflow();
-            } else {
-                this.filtersVisible = !this.filtersVisible;
-            }
-        },
-        handlePageChange(page) {
-            this.$inertia.get('/products', {page});
-        },
-        closeBurgerMenu() {
-            this.burgerMenuVisible = false;
-            this.toggleBodyOverflow();
-        },
-        handleFilterApplied() {
-            if (this.burgerMenuVisible) {
-                return;
-            } else {
-                this.burgerMenuVisible = false;
-                this.toggleBodyOverflow();
-            }
-        },
-        handleFilterUpdated(newFilters) {
-            this.filtersOptions = {...newFilters};
-            this.$inertia.get('/products', this.filtersOptions);
-        },
-        toggleBodyOverflow() {
-            if (this.burgerMenuVisible) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = '';
-            }
-        }
-    },
+const props = defineProps({
+    products:       { type: Array, required: true },
+    domain:         { type: String, default: '' },
+    currentPage:    { type: Number, default: 1 },
+    lastPage:       { type: Number, default: 1 },
+    total:          { type: Number, default: 0 },
+    perPage:        { type: Number, default: 12 },
+    filtersOptions: { type: Object, required: true },
+});
+
+const filtersVisible = ref(true);
+const mobileFiltersOpen = ref(false);
+
+const toggleFilters = () => {
+    if (window.innerWidth < 1024) {
+        mobileFiltersOpen.value = !mobileFiltersOpen.value;
+    } else {
+        filtersVisible.value = !filtersVisible.value;
+    }
+};
+
+const handlePageChange = (page) => {
+    router.get(route('products.index'), { page }, { preserveState: true });
 };
 </script>
+
+<style scoped>
+.drawer-enter-active, .drawer-leave-active {
+    transition: opacity 0.25s ease;
+}
+.drawer-enter-active .absolute.left-0,
+.drawer-leave-active .absolute.left-0 {
+    transition: transform 0.3s ease;
+}
+.drawer-enter-from { opacity: 0; }
+.drawer-leave-to   { opacity: 0; }
+.drawer-enter-from .absolute.left-0 { transform: translateX(-100%); }
+.drawer-leave-to   .absolute.left-0 { transform: translateX(-100%); }
+</style>

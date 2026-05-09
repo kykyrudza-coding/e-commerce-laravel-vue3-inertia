@@ -29,7 +29,7 @@ class AddAddressRenderAction
         $postOffices = PostOffice::select('name')->get();
 
         return Inertia::render('Order/Index', [
-            'userCreate' => false,
+            'contactInfo' => false,
             'addAddress' => true,
             'confirmOrder' => false,
             'products' => $products,

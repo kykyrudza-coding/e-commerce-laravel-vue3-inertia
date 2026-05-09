@@ -1,92 +1,148 @@
-
 <template>
-    <section class="py-24">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid lg:grid-cols-2 grid-cols-1 gap-x-24">
-                <div class="flex items-center lg:mb-0 mb-10">
-                    <div class="w-full">
-                        <h4 class="text-indigo-600 text-base font-medium leading-6 mb-4 lg:text-left text-center">Contact Us</h4>
-                        <h2 class="text-gray-900 font-manrope text-4xl font-semibold leading-10 mb-9 lg:text-left text-center">
-                            Reach Out To Us
-                        </h2>
-                        <form action="">
-                            <!-- Name input -->
-                            <InputWithIcon
-                                id="name"
-                                name="name"
-                                type="text"
-                                placeholder="Your name"
-                            >
-                                <template #icon>
-                                    <i class="ri-user-3-fill"></i>
-                                </template>
-                            </InputWithIcon>
+    <Head title="Контакти" />
 
-                            <!-- Phone input -->
-                            <PhoneInput>
-                                <template #icon>
-                                    <i class="ri-phone-line"></i>
-                                </template>
-                            </PhoneInput>
+    <!-- Hero -->
+    <section class="bg-surface-950 py-24 text-center relative overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-brand-600/20 rounded-full blur-[100px] pointer-events-none mix-blend-screen"></div>
+        </div>
 
-                            <!-- Email input -->
-                            <InputWithIcon
-                                id="email"
-                                name="email"
-                                type="email"
-                                placeholder="name@domain.com"
-                            >
-                                <template #icon>
-                                    <i class="ri-mail-line"></i>
-                                </template>
-                            </InputWithIcon>
-                        </form>
+        <div class="container-app relative z-10">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-900 border border-surface-800 text-brand-400 mb-6 text-sm font-medium">
+                <i class="ri-contacts-line"></i>
+                На зв'язку 24/7
+            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight">Зв'яжіться з нами</h1>
+            <p class="text-lg text-surface-400 max-w-2xl mx-auto leading-relaxed">
+                Ми завжди готові відповісти на ваші запитання, допомогти з вибором техніки або вирішити будь-які технічні проблеми.
+            </p>
+        </div>
+    </section>
+
+    <section class="py-20 bg-surface-50 relative z-20 -mt-10">
+        <div class="container-app">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+                <!-- Contact info -->
+                <div class="space-y-6">
+                    <h2 class="text-3xl font-bold text-surface-900 mb-8 tracking-tight">Наша контактна інформація</h2>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div
+                            v-for="info in contactInfo"
+                            :key="info.label"
+                            class="card bg-white p-6 rounded-2xl border border-surface-200 hover:border-brand-200 hover:shadow-md transition-all duration-300 group"
+                        >
+                            <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-brand-600 group-hover:text-white transition-all">
+                                <i :class="info.icon" class="text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-surface-500 mb-1 font-bold uppercase tracking-wider">{{ info.label }}</p>
+                                <a :href="info.href" class="text-lg font-bold text-surface-900 hover:text-brand-600 transition-colors">
+                                    {{ info.value }}
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="lg:max-w-xl w-full h-[600px] flex items-center justify-center  bg-cover bg-no-repeat bg-[url('https://pagedone.io/asset/uploads/1696245837.png')] ">
-                    <div class="">
-                        <div class="lg:w-96 w-auto h-auto bg-white shadow-xl lg:p-6 p-4">
-                            <Headline text="Shopify" />
-                            <a href="javascript:;" class="flex items-center mb-6">
-                                <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M22.3092 18.3098C22.0157 18.198 21.8689 18.1421 21.7145 18.1287C21.56 18.1154 21.4058 18.1453 21.0975 18.205L17.8126 18.8416C17.4392 18.9139 17.2525 18.9501 17.0616 18.9206C16.8707 18.891 16.7141 18.8058 16.4008 18.6353C13.8644 17.2551 12.1853 15.6617 11.1192 13.3695C10.9964 13.1055 10.935 12.9735 10.9133 12.8017C10.8917 12.6298 10.9218 12.4684 10.982 12.1456L11.6196 8.72559C11.6759 8.42342 11.7041 8.27233 11.6908 8.12115C11.6775 7.96998 11.6234 7.82612 11.5153 7.5384L10.6314 5.18758C10.37 4.49217 10.2392 4.14447 9.95437 3.94723C9.6695 3.75 9.29804 3.75 8.5551 3.75H5.85778C4.58478 3.75 3.58264 4.8018 3.77336 6.06012C4.24735 9.20085 5.64674 14.8966 9.73544 18.9853C14.0295 23.2794 20.2151 25.1426 23.6187 25.884C24.9335 26.1696 26.0993 25.1448 26.0993 23.7985V21.2824C26.0993 20.5428 26.0993 20.173 25.9034 19.8888C25.7076 19.6046 25.362 19.4729 24.6708 19.2096L22.3092 18.3098Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                                </svg>
-                                <h5 class="text-black text-base font-normal leading-6 ml-5">
-                                    070-601-1911
-                                </h5>
-                            </a>
-                            <a href="javascript:;" class="flex items-center mb-6">
-                                <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M2.81501 8.75L10.1985 13.6191C12.8358 15.2015 14.1544 15.9927 15.6032 15.9582C17.0519 15.9237 18.3315 15.0707 20.8905 13.3647L27.185 8.75M12.5 25H17.5C22.214 25 24.5711 25 26.0355 23.5355C27.5 22.0711 27.5 19.714 27.5 15C27.5 10.286 27.5 7.92893 26.0355 6.46447C24.5711 5 22.214 5 17.5 5H12.5C7.78595 5 5.42893 5 3.96447 6.46447C2.5 7.92893 2.5 10.286 2.5 15C2.5 19.714 2.5 22.0711 3.96447 23.5355C5.42893 25 7.78595 25 12.5 25Z" stroke="#000000" stroke-width="2" stroke-linecap="round"></path>
-                                </svg>
-                                <h5 class="text-black text-base font-normal leading-6 ml-5">
-                                    shopify@shopify.com
-                                </h5>
-                            </a>
-                            <a href="javascript:;" class="flex items-center mb-6">
-                                <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M25 12.9169C25 17.716 21.1939 21.5832 18.2779 24.9828C16.8385 26.6609 16.1188 27.5 15 27.5C13.8812 27.5 13.1615 26.6609 11.7221 24.9828C8.80612 21.5832 5 17.716 5 12.9169C5 10.1542 6.05357 7.5046 7.92893 5.55105C9.8043 3.59749 12.3478 2.5 15 2.5C17.6522 2.5 20.1957 3.59749 22.0711 5.55105C23.9464 7.5046 25 10.1542 25 12.9169Z" stroke="#000000" stroke-width="2"></path>
-                                    <path d="M17.5 11.6148C17.5 13.0531 16.3807 14.219 15 14.219C13.6193 14.219 12.5 13.0531 12.5 11.6148C12.5 10.1765 13.6193 9.01058 15 9.01058C16.3807 9.01058 17.5 10.1765 17.5 11.6148Z" stroke="#000000" stroke-width="2"></path>
-                                </svg>
-                                <h5 class="text-black text-base font-normal leading-6 ml-5">
-                                    Ukraine, Kropyvnytskyi , Shevchenko St., p.c. 25000
-                                </h5>
+
+                    <!-- Social -->
+                    <div class="card bg-surface-900 p-8 rounded-3xl mt-8 text-white">
+                        <h3 class="text-xl font-bold mb-2">Ми в соціальних мережах</h3>
+                        <p class="text-surface-400 mb-6 text-sm">Слідкуйте за новинками, акціями та життям нашого магазину.</p>
+                        <div class="flex gap-4">
+                            <a v-for="s in socials" :key="s.label" :href="s.href" :aria-label="s.label"
+                               class="w-12 h-12 rounded-2xl bg-surface-800 border border-surface-700 flex items-center justify-center text-surface-300 hover:bg-brand-600 hover:text-white hover:border-brand-600 hover:scale-110 transition-all duration-300 shadow-lg">
+                                <i :class="s.icon" class="text-2xl"></i>
                             </a>
                         </div>
                     </div>
+                </div>
+
+                <!-- Contact form -->
+                <div class="card bg-white p-8 md:p-10 rounded-3xl border border-surface-200 shadow-xl shadow-surface-200/50">
+                    <h2 class="text-2xl font-bold text-surface-900 mb-2">Надіслати повідомлення</h2>
+                    <p class="text-surface-500 mb-8">Заповніть форму нижче, і ми зв'яжемося з вами найближчим часом.</p>
+
+                    <div v-if="sent" class="p-6 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex flex-col items-center text-center animate-fade-in">
+                        <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mb-4">
+                            <i class="ri-check-line text-3xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold mb-2">Повідомлення успішно надіслано!</h3>
+                        <p class="text-emerald-700/80">Дякуємо за звернення. Наш менеджер відповість вам протягом 24 годин.</p>
+                        <button @click="sent = false; form.message = ''" class="mt-6 text-sm font-bold text-emerald-700 hover:text-emerald-900 underline">
+                            Надіслати ще одне
+                        </button>
+                    </div>
+
+                    <form v-else @submit.prevent="sendMessage" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="contact-name" class="block text-sm font-bold text-surface-900 mb-2">Ваше ім'я</label>
+                                <div class="relative">
+                                    <i class="ri-user-3-line absolute left-4 top-1/2 -translate-y-1/2 text-surface-400"></i>
+                                    <input id="contact-name" v-model="form.name" type="text" placeholder="Іван Петренко" class="w-full h-12 pl-11 pr-4 rounded-xl border border-surface-200 bg-surface-50 focus:bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none" required />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="contact-email" class="block text-sm font-bold text-surface-900 mb-2">Email</label>
+                                <div class="relative">
+                                    <i class="ri-mail-line absolute left-4 top-1/2 -translate-y-1/2 text-surface-400"></i>
+                                    <input id="contact-email" v-model="form.email" type="email" placeholder="your@email.com" class="w-full h-12 pl-11 pr-4 rounded-xl border border-surface-200 bg-surface-50 focus:bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none" required />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="contact-message" class="block text-sm font-bold text-surface-900 mb-2">Повідомлення</label>
+                            <textarea
+                                id="contact-message"
+                                v-model="form.message"
+                                rows="5"
+                                placeholder="Опишіть ваше запитання детально..."
+                                class="w-full p-4 rounded-xl border border-surface-200 bg-surface-50 focus:bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none resize-none"
+                                required
+                            ></textarea>
+                        </div>
+
+                        <button type="submit" :disabled="sending" class="w-full h-14 rounded-xl bg-brand-600 text-white font-bold flex items-center justify-center gap-2 hover:bg-brand-700 transition-colors shadow-lg shadow-brand-500/20" id="contact-send-btn">
+                            <i v-if="sending" class="ri-loader-4-line animate-spin"></i>
+                            <i v-else class="ri-send-plane-fill"></i>
+                            {{ sending ? 'Надсилаємо...' : 'Надіслати повідомлення' }}
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     </section>
 </template>
 
-<script>
-import Headline from "@/Components/Forms/Headline.vue";
-import InputWithIcon from "@/Components/Forms/InputWithIcon.vue";
-import PhoneInput from "@/Components/Forms/PhoneInput.vue";
+<script setup>
+import { ref, reactive } from 'vue';
 
-export default {
-    name: "Index",
-    components: {PhoneInput, InputWithIcon, Headline}
-}
+const sent = ref(false);
+const sending = ref(false);
+
+const form = reactive({ name: '', email: '', message: '' });
+
+const sendMessage = () => {
+    sending.value = true;
+    // Simulate send (replace with actual axios call if you have an endpoint)
+    setTimeout(() => {
+        sending.value = false;
+        sent.value = true;
+    }, 1000);
+};
+
+const contactInfo = [
+    { label: 'Телефон',  icon: 'ri-phone-line',    href: 'tel:+380706011911',          value: '+380-70-601-19-11' },
+    { label: 'Email',    icon: 'ri-mail-line',      href: 'mailto:info@techstore.ua',   value: 'info@techstore.ua' },
+    { label: 'Адреса',   icon: 'ri-map-pin-line',   href: '#',                          value: 'Кропивницький, вул. Шевченка, 25000' },
+    { label: 'Графік',   icon: 'ri-time-line',      href: '#',                          value: 'Пн–Пт: 9:00–18:00, Сб–Нд: вихідний' },
+];
+
+const socials = [
+    { label: 'Facebook', icon: 'ri-facebook-fill',  href: '#' },
+    { label: 'Instagram', icon: 'ri-instagram-line', href: '#' },
+    { label: 'Telegram', icon: 'ri-telegram-line',  href: '#' },
+];
 </script>

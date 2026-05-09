@@ -80,7 +80,7 @@
 
 <script>
 import ReviewModal from "@/Components/Modals/ReviewModal.vue";
-import {Inertia} from "@inertiajs/inertia";
+import {router} from "@inertiajs/vue3";
 export default {
     name: "ProductSliderSection",
     components: {ReviewModal},
@@ -123,9 +123,9 @@ export default {
     },
     methods: {
         buyNow() {
-            Inertia.post(`/products/${this.product.id}/buy-now`, {}, {
+            router.post(`/products/${this.product.id}/buy-now`, {}, {
                 onSuccess: () => {
-                    Inertia.visit('/checkout');
+                    router.visit('/checkout');
                 },
                 onError: (error) => {
                     console.error('Ошибка при добавлении товара в корзину:', error);
@@ -158,7 +158,7 @@ export default {
         handleSubmitReview(formData) {
             const productId = this.product.id;
 
-            Inertia.post(`/products/${productId}/review-add`, formData, {
+            router.post(`/products/${productId}/review-add`, formData, {
                 onSuccess: () => {
                     alert('Отзыв успешно отправлен!');
                     this.closeModal();

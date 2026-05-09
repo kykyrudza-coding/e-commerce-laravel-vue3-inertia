@@ -23,35 +23,65 @@ class CreateUserStoreAction
     {
         $this->getAnonymousUserId = $getAnonymousUserId;
     }
-    public function createUserStoreAction(CreateUserRequest $request, $token): SymphonyResponse|InertiaResponse|RedirectResponse
+    public function createUserStoreAction(Request $request, $token): SymphonyResponse|InertiaResponse|RedirectResponse
     {
-        $user = User::where('email', $request->email)->first();
-
         $user_id = auth()->check() ? auth()->id() : $this->getAnonymousUserId->getAnonymousUserId();
-
         $cartItem = session('cart_' . $user_id, []);
 
-        if (!$user) {
+        if (auth()->check()) {
             $request->validate([
-                'name' => 'required|string|max:255|min:5|unique:users,name',
-                'phone' => 'required|regex:/^\d{3}-\d{3}-\d{4}$/|unique:users,phone',
-                'email' => 'required|email|max:255|unique:users,email',
-                'password' => 'required|string|min:8|confirmed',
+                'name' => 'required|string|max:255|min:2',
+                'phone' => 'required|string|max:20',
+                'email' => 'required|email|max:255',
             ]);
+            $user = auth()->user();
+            $user->update([
+                'name' => $request->name,
+                'phone' => $request->phone,
+            ]);
+            // Note: We don't update email to prevent accidental login issues during checkout
+            session(['checkout_user' => $user]);
+            return Inertia::location(route('order.addAddress', ['token' => $token]));
+        }
 
-            $user = new User([
+        $request->validate([
+            'name' => 'required|string|max:255|min:2',
+            'phone' => 'required|string|max:20',
+            'email' => 'required|email|max:255',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user) {
+            // User exists but not logged in. We can't log them in securely without a password.
+            // But we can store their contact info in session for the order.
+            // We will attach the order to this user later.
+            session(['checkout_user' => [
+                'id' => $user->id,
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+            ]]);
+        } else {
+            // Create a new background user with a random password
+            $user = User::create([
                 'name' => $request->name,
                 'phone' => $request->phone,
                 'email' => $request->email,
-                'password' => bcrypt($request->password),
+                'password' => bcrypt(\Illuminate\Support\Str::random(16)),
             ]);
-
-            $user->save();
+            
+            // Log them in since we just created it
+            Auth::login($user);
+            session(['cart_' . $user->id => $cartItem]);
+            
+            session(['checkout_user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+            ]]);
         }
-
-        Auth::login($user);
-
-        session(['cart_' . $user->id => $cartItem]);
 
         return Inertia::location(route('order.addAddress', ['token' => $token]));
     }

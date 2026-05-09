@@ -9,13 +9,13 @@ class ConfirmationAction
 {
     public function confirmation($token): Response
     {
-        $user = auth()->user();
+        $user = auth()->user() ?? session('checkout_user');
         $data = session('data');
         $method = session('method');
         $products = session('products');
 
         return Inertia::render('Order/Index', [
-            'userCreate' => false,
+            'contactInfo' => false,
             'addAddress' => false,
             'confirmOrder' => true,
             'products' => $products,

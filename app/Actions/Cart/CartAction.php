@@ -4,7 +4,7 @@ namespace App\Actions\Cart;
 
 use App\Models\Cart;
 use App\Models\Product;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 
 class CartAction
@@ -30,27 +30,27 @@ class CartAction
         ]);
     }
 
-    public function add_to_cart($product_slug): JsonResponse
+    public function add_to_cart($product_id): \Illuminate\Http\RedirectResponse
     {
-        $product = Product::findOrFail($product_slug);
+        $product = Product::findOrFail($product_id);
 
         $user_id = auth()->id();
 
         $cartItem = Cart::where('user_id', $user_id)
-            ->where('slug', $product_slug)
+            ->where('product_id', $product->id)
             ->first();
 
         if ($cartItem) {
             $cartItem->increment('quantity');
-        }else{
+        } else {
             Cart::create([
                 'product_id' => $product->id,
-                'user_id' => $user_id,
-                'quantity' => 1,
+                'user_id'    => $user_id,
+                'quantity'   => 1,
             ]);
         }
 
-        return response()->json([]);
+        return back()->with('success', 'Товар додано до кошика');
     }
 
 }

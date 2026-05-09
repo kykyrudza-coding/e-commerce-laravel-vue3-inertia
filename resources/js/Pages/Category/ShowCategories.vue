@@ -1,46 +1,57 @@
 <template>
-    <div class="py-12">
-        <Headline :text="category.name"/>
-        <div class="flex w-full items-center justify-between" >
+    <Head :title="category.name" />
+
+    <div class="container-app py-8">
+        <!-- Breadcrumb -->
+        <nav class="flex items-center gap-2 text-sm text-surface-400 mb-6">
+            <Link :href="route('home')" class="hover:text-surface-600 transition-colors">Головна</Link>
+            <i class="ri-arrow-right-s-line"></i>
+            <span class="text-surface-700 font-medium">{{ category.name }}</span>
+        </nav>
+
+        <h1 class="page-title mb-2">{{ category.name }}</h1>
+        <p class="page-subtitle mb-8">{{ products.length || 0 }} товарів у категорії</p>
+
+        <!-- Subcategory chips -->
+        <div v-if="category.all_children?.length" class="flex flex-wrap gap-2 mb-8">
             <Link
-                v-for="child in category.all_children" :key="child.id"
-                :href="route('categories.show.subcategory', {subcategory_slug: child.slug})"
-                class="text-base font-semibold my-5 group relative w-max">
+                v-for="child in category.all_children"
+                :key="child.id"
+                :href="route('categories.show.subcategory', { subcategory_slug: child.slug })"
+                class="btn-secondary btn-sm"
+                :id="`category-chip-${child.slug}`"
+            >
                 {{ child.name }}
-                <span class="absolute -bottom-1 left-1/2 w-0 transition-all h-0.5 bg-indigo-600 group-hover:w-3/6"></span>
-                <span class="absolute -bottom-1 right-1/2 w-0 transition-all h-0.5 bg-indigo-600 group-hover:w-3/6"></span>
             </Link>
         </div>
-        <div class="flex-grow transition-all duration-500 ease-in-out">
-            <ProductSectionAllProducts
-                :domain="domain"
-                :showFilter="false"
-                :products="products"
-            />
-        </div>
+
+        <!-- Products -->
+        <ProductGrid :products="products" :domain="domain" />
+
+        <!-- Pagination -->
+        <AppPagination
+            v-if="lastPage > 1"
+            :current-page="currentPage"
+            :last-page="lastPage"
+            :total="total"
+            :per-page="perPage"
+            @page-changed="(p) => router.get(route('categories.show', category.slug), { page: p })"
+        />
     </div>
 </template>
 
-<script>
-import ProductSectionAllProducts from "@/Components/Products/ProductSection/ProductSectionAllProducts.vue";
-import {Link} from "@inertiajs/vue3";
-import Headline from "@/Components/Forms/Headline.vue";
-import UnderLineLink from "@/Components/Links/UnderLineLink.vue";
-export default {
-    props: {
-        category: Object,
-        products: Object,
-        currentPage: Number,
-        lastPage: Number,
-        total: Number,
-        perPage: Number,
-        domain: String
-    },
-    components: {
-        UnderLineLink,
-        Headline,
-        Link,
-        ProductSectionAllProducts
-    }
-};
+<script setup>
+import { router } from '@inertiajs/vue3';
+import ProductGrid from '@/Components/Products/ProductGrid.vue';
+import AppPagination from '@/Components/Products/AppPagination.vue';
+
+defineProps({
+    category:    { type: Object, required: true },
+    products:    { type: [Array, Object], default: () => [] },
+    currentPage: { type: Number, default: 1 },
+    lastPage:    { type: Number, default: 1 },
+    total:       { type: Number, default: 0 },
+    perPage:     { type: Number, default: 12 },
+    domain:      { type: String, default: '' },
+});
 </script>

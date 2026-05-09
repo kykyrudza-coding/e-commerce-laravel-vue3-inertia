@@ -17,7 +17,7 @@ class OrderController extends Controller
         return $action->createUserRenderAction($token);
     }
 
-    public function store(CreateUserRequest $request, CreateUserStoreAction $action, $token)
+    public function store(Request $request, CreateUserStoreAction $action, $token)
     {
         return $action->createUserStoreAction($request, $token);
     }

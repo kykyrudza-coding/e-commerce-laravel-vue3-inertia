@@ -1,35 +1,41 @@
 <template>
-    <div class="py-12">
-        <Headline :text="category.name"/>
+    <Head :title="category.name" />
 
-        <div class="flex-grow transition-all duration-500 ease-in-out">
-            <ProductSectionAllProducts
-                :showFilter="false"
-                :products="products"
-                :domain="domain"
-            />
-        </div>
+    <div class="container-app py-8">
+        <nav class="flex items-center gap-2 text-sm text-surface-400 mb-6">
+            <Link :href="route('home')" class="hover:text-surface-600 transition-colors">Головна</Link>
+            <i class="ri-arrow-right-s-line"></i>
+            <span class="text-surface-700 font-medium">{{ category.name }}</span>
+        </nav>
+
+        <h1 class="page-title mb-2">{{ category.name }}</h1>
+        <p class="page-subtitle mb-8">{{ Array.isArray(products) ? products.length : 0 }} товарів</p>
+
+        <ProductGrid :products="Array.isArray(products) ? products : Object.values(products)" :domain="domain" />
+
+        <AppPagination
+            v-if="lastPage > 1"
+            :current-page="currentPage"
+            :last-page="lastPage"
+            :total="total"
+            :per-page="perPage"
+            @page-changed="(p) => router.get(window.location.pathname, { page: p })"
+        />
     </div>
 </template>
 
-<script>
-import ProductSectionAllProducts from "@/Components/Products/ProductSection/ProductSectionAllProducts.vue";
-import {Link} from "@inertiajs/vue3";
-import Headline from "@/Components/Forms/Headline.vue";
-export default {
-    props: {
-        category: Object,
-        products: Object,
-        currentPage: Number,
-        lastPage: Number,
-        total: Number,
-        perPage: Number,
-        domain: String
-    },
-    components: {
-        Headline,
-        Link,
-        ProductSectionAllProducts
-    }
-};
+<script setup>
+import { router } from '@inertiajs/vue3';
+import ProductGrid from '@/Components/Products/ProductGrid.vue';
+import AppPagination from '@/Components/Products/AppPagination.vue';
+
+defineProps({
+    category:    { type: Object, required: true },
+    products:    { type: [Array, Object], default: () => [] },
+    currentPage: { type: Number, default: 1 },
+    lastPage:    { type: Number, default: 1 },
+    total:       { type: Number, default: 0 },
+    perPage:     { type: Number, default: 12 },
+    domain:      { type: String, default: '' },
+});
 </script>

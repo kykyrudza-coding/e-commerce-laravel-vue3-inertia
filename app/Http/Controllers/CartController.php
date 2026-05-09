@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\Cart\CartAction;
 use App\Models\Cart;
 use App\Models\Product;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 
 class CartController extends Controller

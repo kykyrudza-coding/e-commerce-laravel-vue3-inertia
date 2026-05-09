@@ -1,35 +1,38 @@
 import { createApp, h } from 'vue';
-import { createInertiaApp } from '@inertiajs/vue3';
-import autoAnimate from '@formkit/auto-animate';
-import Layout from './Layouts/Layout.vue';
-import registerGlobalComponents from "./components.js";
+import { createInertiaApp, Head, Link } from '@inertiajs/vue3';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import AppLayout from './Layouts/AppLayout.vue';
 
 createInertiaApp({
-    resolve: async name => {
-        try {
-            const path = `./Pages/${name}.vue`;
-            console.log(`Loading component from path: ${path}`);
-            const page = (await import(`${path}`)).default;
-            page.layout = page.layout || Layout;
-            return page;
-        } catch (error) {
-            console.error(`Error loading component ${name}:`, error);
-            throw error;
-        }
+    title: (title) => title ? `${title} — TechStore` : 'TechStore',
+
+    resolve: (name) => {
+        const page = resolvePageComponent(
+            `./Pages/${name}.vue`,
+            import.meta.glob('./Pages/**/*.vue'),
+        );
+
+        page.then((module) => {
+            // Assign default layout unless the page explicitly opts out (layout: null)
+            if (module.default.layout === undefined) {
+                module.default.layout = AppLayout;
+            }
+        });
+
+        return page;
     },
-    setup({ el, App, props }) {
-        const app = createApp({ render: () => h(App, props) });
 
-        app.directive('auto-animate', autoAnimate);
-        app.mixin({ methods: { route: window.route } });
-
-        registerGlobalComponents(app);
-
-        let animationRoot;
-        animationRoot = el;
-        autoAnimate(animationRoot);
-
-        app.mount(el);
+    setup({ el, App, props, plugin }) {
+        createApp({ render: () => h(App, props) })
+            .use(plugin)
+            .component('Head', Head)
+            .component('Link', Link)
+            .mixin({ methods: { route: window.route } })
+            .mount(el);
     },
-}).then(r => console.log('application ready'));
 
+    progress: {
+        color: '#6366f1',
+        showSpinner: false,
+    },
+});

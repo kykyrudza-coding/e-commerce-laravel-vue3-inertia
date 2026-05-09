@@ -39,16 +39,13 @@ class CreateUserRenderAction
             abort(403, 'Unauthorized action.');
         }
 
-        if (auth()->check()) {
-            return redirect()->route('order.addAddress', $token);
-        } else {
-            return Inertia::render('Order/Index', [
-                'userCreate' => true,
-                'addAddress' => false,
-                'confirmOrder' => false,
-                'products' => $products,
-                'token' => $token,
-            ]);
-        }
+        return Inertia::render('Order/Index', [
+            'contactInfo' => true,
+            'addAddress' => false,
+            'confirmOrder' => false,
+            'products' => $products,
+            'token' => $token,
+            'user' => auth()->user() ?? session('checkout_user', []),
+        ]);
     }
 }

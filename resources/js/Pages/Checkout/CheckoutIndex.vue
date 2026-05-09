@@ -1,81 +1,108 @@
 <template>
-    <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-4">
-            Перевірка замовлення
-        </h1>
+    <Head title="Оформлення замовлення" />
 
-        <table class="min-w-full table-auto">
-            <thead>
-            <tr class="border-b">
-                <th class="text-center p-4">Товар</th>
-                <th class="text-center p-4">Назва</th>
-                <th class="text-center p-4">Ціна</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="product in products" :key="product.id" class="border-b">
-                <td class="p-4 text-center w-1/3">
-                    <div class="flex items-center justify-center">
-                        <img
-                            v-if="product.main_image"
-                            :src="imageUrl(product.main_image)"
-                            alt="product image"
-                            class="xl:w-[140px] rounded-xl w-52 object-cover"
-                        />
+    <div class="container-app py-8">
+        <!-- Breadcrumb -->
+        <nav class="flex items-center gap-2 text-sm text-surface-400 mb-6">
+            <Link :href="route('home')" class="hover:text-surface-600 transition-colors">Головна</Link>
+            <i class="ri-arrow-right-s-line"></i>
+            <Link :href="route('products.index')" class="hover:text-surface-600 transition-colors">Каталог</Link>
+            <i class="ri-arrow-right-s-line"></i>
+            <span class="text-surface-700 font-medium">Оформлення</span>
+        </nav>
+
+        <h1 class="page-title mb-8">Перевірка замовлення</h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Products list -->
+            <div class="lg:col-span-2">
+                <div class="card overflow-hidden">
+                    <div class="px-5 py-4 border-b border-surface-100 bg-surface-50">
+                        <h2 class="font-semibold text-surface-800 text-sm">Товари у замовленні</h2>
                     </div>
-                </td>
-                <td class="p-4 text-center w-1/3">
-                    <h5 class="font-semibold sm:!text-xl leading-8 text-black">
-                        {{ product.name }}
-                    </h5>
-                </td>
-                <td class="p-4 text-center w-1/3">
-                    <h6 class="font-medium text-lg leading-8 text-indigo-600">
-                        ${{ product.price }}
-                    </h6>
-                </td>
-            </tr>
-            </tbody>
-        </table>
 
-       <div class="flex items-center justify-between my-2 rounded-md p-10 bg-zinc-50">
-           <div class="sm:!text-xl font-bold">
-               Загальна сумма: ${{ totalAmount }}
-           </div>
+                    <div class="divide-y divide-surface-100">
+                        <div
+                            v-for="product in products"
+                            :key="product.id"
+                            class="flex items-center gap-4 px-5 py-4"
+                        >
+                            <!-- Image -->
+                            <div class="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-surface-100">
+                                <img
+                                    v-if="product.main_image"
+                                    :src="`${domain}${product.main_image.image_path}`"
+                                    :alt="product.name"
+                                    class="w-full h-full object-cover"
+                                />
+                                <div v-else class="w-full h-full flex items-center justify-center text-surface-300">
+                                    <i class="ri-image-2-line text-xl"></i>
+                                </div>
+                            </div>
 
-           <button @click="proceedToNextStep" class="bg-indigo-600 px-2 py-1 text-white sm:!px-4 sm:!py-2 rounded hover:bg-indigo-700">
-               Перейти до оформлення
-           </button>
-       </div>
+                            <!-- Info -->
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-surface-800 truncate">{{ product.name }}</p>
+                                <p class="text-xs text-surface-400 mt-0.5">{{ product.category?.name }}</p>
+                            </div>
+
+                            <!-- Price -->
+                            <span class="price text-base flex-shrink-0">{{ formatPrice(product.price) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order summary -->
+            <div>
+                <div class="card p-6 sticky top-20">
+                    <h2 class="font-semibold text-surface-900 mb-5">Підсумок</h2>
+
+                    <div class="space-y-3 text-sm mb-5">
+                        <div class="flex justify-between text-surface-600">
+                            <span>Кількість товарів</span>
+                            <span>{{ products.length }}</span>
+                        </div>
+                        <div class="pt-3 border-t border-surface-100 flex justify-between font-bold text-base">
+                            <span>Разом</span>
+                            <span class="price">{{ formatPrice(totalAmount) }}</span>
+                        </div>
+                    </div>
+
+                    <button
+                        @click="proceedToCheckout"
+                        class="btn-primary w-full btn-lg justify-center"
+                        id="checkout-proceed-btn"
+                    >
+                        <i class="ri-secure-payment-line"></i>
+                        Перейти до оплати
+                    </button>
+
+                    <Link :href="route('products.index')" class="btn-ghost w-full mt-3 justify-center btn-sm">
+                        <i class="ri-arrow-left-line"></i>
+                        Продовжити покупки
+                    </Link>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
-<script>
-import {Inertia} from "@inertiajs/inertia";
-export default {
-    name: "CheckoutIndex",
-    props: {
-        products: {
-            type: Object,
-            required: true
-        },
-        domain: {
-            type: String,
-            required: true
-        }
-    },
-    computed: {
-        totalAmount() {
-            return this.products.reduce((total, product) => total + parseFloat(product.price), 0).toFixed(2);
-        }
-    },
-    methods: {
-        imageUrl(main_image) {
-            return main_image?.image_path ? `${this.domain}${main_image.image_path}` : '';
-        },
-        proceedToNextStep() {
-            Inertia.post(route('checkout.store'));
-        }
-    }
-}
+<script setup>
+import { computed } from 'vue';
+import { router } from '@inertiajs/vue3';
+import { formatPrice } from '@/utils/helpers.js';
+
+const props = defineProps({
+    products: { type: Array, required: true },
+    domain:   { type: String, required: true },
+});
+
+const totalAmount = computed(() =>
+    props.products.reduce((sum, p) => sum + parseFloat(p.price || 0), 0)
+);
+
+const proceedToCheckout = () => {
+    router.post(route('checkout.store'));
+};
 </script>

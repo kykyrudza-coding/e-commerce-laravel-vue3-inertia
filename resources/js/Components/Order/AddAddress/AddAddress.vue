@@ -1,265 +1,198 @@
 <template>
-    <section class="py-12 h-full">
-        <div class="tabs mb-6">
-            <div class="flex">
-                <ul class="flex bg-gray-100 rounded-2xl p-2 overflow-hidden">
-                    <li>
-                        <a
-                            href="javascript:void(0)"
-                            @click="activeTab = 'pickup'"
-                            :class="['inline-block py-3 px-6 font-medium', activeTab === 'pickup' ? 'bg-white rounded-xl text-indigo-600' : 'text-gray-500 hover:text-gray-800']"
-                        >
-                            Самовивіз
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                            href="javascript:void(0)"
-                            @click="activeTab = 'delivery'"
-                            :class="['inline-block py-3 px-6 font-medium', activeTab === 'delivery' ? 'bg-white rounded-xl text-indigo-600' : 'text-gray-500 hover:text-gray-800']"
-                        >
-                            Доставка додому
-                        </a>
-                    </li>
-                </ul>
-            </div>
+    <div class="card p-6 lg:p-8 animate-fade-in">
+        <div class="mb-6">
+            <h2 class="text-xl font-bold text-surface-900 mb-1">Доставка</h2>
+            <p class="text-sm text-surface-500">Оберіть спосіб та вкажіть деталі доставки</p>
         </div>
 
-        <form @submit.prevent="submitForm">
-            <div v-if="activeTab === 'pickup'" class="bg-white p-6 rounded-lg shadow-md mb-6">
-                <h3 class="text-lg font-semibold mb-4">
-                    Самовивіз (Самовивіз, лише по місту Кропивницький)
-                </h3>
-                <SelectInput
-                    v-model="form.city"
-                    :options="cities"
-                    :error="errors.city"
-                    placeholder="Місто"
-                    name="city_select"
-                    id="city_select"
-                />
-                <SelectInput
-                    v-model="form.region"
-                    :options="regions"
-                    :error="errors.regions"
-                    placeholder="Район"
-                    name="region_select"
-                    id="region_select"
-                />
-                <SelectInput
-                    v-model="form.postOffices"
-                    :options="postOffices"
-                    :error="errors.postOffices"
-                    placeholder="Відділення пошти"
-                    name="postOffices"
-                    id="postOffices"
-                />
-                <InputWithIcon
-                    v-model="form.date"
-                    :error="errors.date"
-                    type="date"
-                    placeholder="Дата самовивезення"
-                    name="date"
-                    id="date"
-                >
-                    <template #icon>
-                        <i class="ri-calendar-line"></i>
-                    </template>
-                </InputWithIcon>
-                <Textarea
-                    v-model="form.comments"
-                    :error="errors.comments"
-                    placeholder="Коментар до самовивезення"
-                />
-            </div>
+        <!-- Tabs -->
+        <div class="flex rounded-xl bg-surface-100 p-1 mb-6">
+            <button
+                @click="activeTab = 'pickup'"
+                :class="['flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200', activeTab === 'pickup' ? 'bg-white text-surface-900 shadow-sm' : 'text-surface-500 hover:text-surface-700']"
+            >
+                Самовивіз
+            </button>
+            <button
+                @click="activeTab = 'delivery'"
+                :class="['flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200', activeTab === 'delivery' ? 'bg-white text-surface-900 shadow-sm' : 'text-surface-500 hover:text-surface-700']"
+            >
+                Доставка додому
+            </button>
+        </div>
 
-            <div v-if="activeTab === 'delivery'" class="bg-white p-6 rounded-lg shadow-md mb-6">
-                <h3 class="text-lg font-semibold mb-4">
-                    Доставка додому
-                </h3>
-                <InputWithIcon
-                    v-model="form.region"
-                    :error="errors.region"
-                    placeholder="Регіон / Область"
-                    type="region"
-                    name="region"
-                    id="region"
-                >
-                    <template #icon>
-                        <i class="ri-map-pin-line"></i>
-                    </template>
-                </InputWithIcon>
-                <InputWithIcon
-                    v-model="form.city"
-                    :error="errors.city"
-                    placeholder="Місто"
-                    type="city"
-                    name="city"
-                    id="city"
-                >
-                    <template #icon>
-                        <i class="ri-building-line"></i>
-                    </template>
-                </InputWithIcon>
-                <InputWithIcon
-                    v-model="form.street"
-                    :error="errors.street"
-                    placeholder="Вулиця"
-                    type="street"
-                    name="street"
-                    id="street"
-                >
-                    <template #icon>
-                        <i class="ri-road-map-line"></i>
-                    </template>
-                </InputWithIcon>
-                <InputWithIcon
-                    v-model="form.house"
-                    :error="errors.house"
-                    placeholder="Дім / Квартира"
-                    type="house"
-                    name="house"
-                    id="house"
-                >
-                    <template #icon>
-                        <i class="ri-home-4-line"></i>
-                    </template>
-                </InputWithIcon>
-                <InputWithIcon
-                    v-model="form.postal_code"
-                    :error="errors.postal_code"
-                    placeholder="Поштовий індекс"
-                    type="postal_code"
-                    name="post_index"
-                    id="post_index"
-                >
-                    <template #icon>
-                        <i class="ri-mail-open-line"></i>
-                    </template>
-                </InputWithIcon>
-                <Textarea
-                    v-model="form.comments"
-                    :error="errors.comments"
-                    placeholder="Коментар для кур'єра"
-                />
-            </div>
+        <form @submit.prevent="submitForm" class="space-y-4">
+            <!-- Pickup Tab -->
+            <Transition name="fade" mode="out-in">
+                <div v-if="activeTab === 'pickup'" key="pickup" class="space-y-4">
+                    <div class="p-4 bg-brand-50 rounded-xl mb-4 border border-brand-100">
+                        <p class="text-sm text-brand-700 flex items-center gap-2">
+                            <i class="ri-information-line text-lg"></i>
+                            Самовивіз доступний лише по місту Кропивницький
+                        </p>
+                    </div>
 
-            <BasicButton type="submit" text="Наступний крок" />
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-surface-700 mb-1.5">Місто</label>
+                            <select v-model="form.city" :class="['input', errors.city && 'input-error']">
+                                <option value="" disabled>Оберіть місто</option>
+                                <option v-for="(item, idx) in cities" :key="idx" :value="item.name">{{ item.name }}</option>
+                            </select>
+                            <p v-if="errors.city" class="mt-1 text-xs text-red-500">{{ errors.city }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-surface-700 mb-1.5">Район</label>
+                            <select v-model="form.region" :class="['input', errors.region && 'input-error']">
+                                <option value="" disabled>Оберіть район</option>
+                                <option v-for="(item, idx) in regions" :key="idx" :value="item.name">{{ item.name }}</option>
+                            </select>
+                            <p v-if="errors.region" class="mt-1 text-xs text-red-500">{{ errors.region }}</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-surface-700 mb-1.5">Відділення пошти</label>
+                        <select v-model="form.postOffices" :class="['input', errors.postOffices && 'input-error']">
+                            <option value="" disabled>Оберіть відділення</option>
+                            <option v-for="(item, idx) in postOffices" :key="idx" :value="item.name">{{ item.name }}</option>
+                        </select>
+                        <p v-if="errors.postOffices" class="mt-1 text-xs text-red-500">{{ errors.postOffices }}</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-surface-700 mb-1.5">Дата самовивезення</label>
+                        <div class="relative">
+                            <i class="ri-calendar-line absolute left-3.5 top-1/2 -translate-y-1/2 text-surface-400"></i>
+                            <input v-model="form.date" type="date" :class="['input pl-10', errors.date && 'input-error']" />
+                        </div>
+                        <p v-if="errors.date" class="mt-1 text-xs text-red-500">{{ errors.date }}</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-surface-700 mb-1.5">Коментар</label>
+                        <textarea v-model="form.comments" rows="2" placeholder="Додаткова інформація..." class="input resize-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- Delivery Tab -->
+                <div v-else key="delivery" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-surface-700 mb-1.5">Регіон / Область</label>
+                            <div class="relative">
+                                <i class="ri-map-pin-line absolute left-3.5 top-1/2 -translate-y-1/2 text-surface-400"></i>
+                                <input v-model="form.region" type="text" placeholder="Наприклад: Київська область" :class="['input pl-10', errors.region && 'input-error']" />
+                            </div>
+                            <p v-if="errors.region" class="mt-1 text-xs text-red-500">{{ errors.region }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-surface-700 mb-1.5">Місто</label>
+                            <div class="relative">
+                                <i class="ri-building-line absolute left-3.5 top-1/2 -translate-y-1/2 text-surface-400"></i>
+                                <input v-model="form.city" type="text" placeholder="Наприклад: Київ" :class="['input pl-10', errors.city && 'input-error']" />
+                            </div>
+                            <p v-if="errors.city" class="mt-1 text-xs text-red-500">{{ errors.city }}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-surface-700 mb-1.5">Вулиця</label>
+                            <div class="relative">
+                                <i class="ri-road-map-line absolute left-3.5 top-1/2 -translate-y-1/2 text-surface-400"></i>
+                                <input v-model="form.street" type="text" placeholder="Назва вулиці" :class="['input pl-10', errors.street && 'input-error']" />
+                            </div>
+                            <p v-if="errors.street" class="mt-1 text-xs text-red-500">{{ errors.street }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-surface-700 mb-1.5">Дім / Квартира</label>
+                            <div class="relative">
+                                <i class="ri-home-4-line absolute left-3.5 top-1/2 -translate-y-1/2 text-surface-400"></i>
+                                <input v-model="form.house" type="text" placeholder="№" :class="['input pl-10', errors.house && 'input-error']" />
+                            </div>
+                            <p v-if="errors.house" class="mt-1 text-xs text-red-500">{{ errors.house }}</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-surface-700 mb-1.5">Поштовий індекс</label>
+                        <div class="relative">
+                            <i class="ri-mail-open-line absolute left-3.5 top-1/2 -translate-y-1/2 text-surface-400"></i>
+                            <input v-model="form.postal_code" type="text" placeholder="00000" :class="['input pl-10', errors.postal_code && 'input-error']" />
+                        </div>
+                        <p v-if="errors.postal_code" class="mt-1 text-xs text-red-500">{{ errors.postal_code }}</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-surface-700 mb-1.5">Коментар для кур'єра</label>
+                        <textarea v-model="form.comments" rows="2" placeholder="Особливості доїзду, код домофону..." class="input resize-none"></textarea>
+                    </div>
+                </div>
+            </Transition>
+
+            <button type="submit" class="btn-primary w-full btn-lg justify-center mt-6">
+                Наступний крок
+                <i class="ri-arrow-right-line"></i>
+            </button>
         </form>
-    </section>
+    </div>
 </template>
 
-<script>
-import InputWithIcon from "@/Components/Forms/InputWithIcon.vue"
-import PhoneInput from "@/Components/Forms/PhoneInput.vue"
-import Textarea from "@/Components/Forms/Textarea.vue"
-import SelectInput from "@/Components/Forms/SelectInput.vue"
-import BasicButton from "@/Components/Forms/BasicButton.vue"
-import {Inertia} from "@inertiajs/inertia";
+<script setup>
+import { ref, reactive } from 'vue';
+import { router } from '@inertiajs/vue3';
 
-export default {
-    name: "AddAddress",
-    components: { InputWithIcon, PhoneInput, Textarea, SelectInput, BasicButton },
-    props: {
-        cities: {
-            type: Object,
-            required: true
-        },
-        regions: {
-            type: Object,
-            required: true
-        },
-        postOffices: {
-            type: Object,
-            required: true
-        },
-        token: {
-            type: String,
-            required: true
-        },
-    },
-    data() {
-        return {
-            activeTab: 'pickup',
-            form: {
-                postOffices: '',
-                date: '',
-                comments: '',
-                country: '',
-                street: '',
-                house: '',
-                postal_code: '',
-            },
-            errors: {},
-        }
-    },
-    methods: {
-        submitForm() {
-            let formData = {};
+const props = defineProps({
+    token:       { type: String, required: true },
+    cities:      { type: [Object, Array], default: () => [] },
+    regions:     { type: [Object, Array], default: () => [] },
+    postOffices: { type: [Object, Array], default: () => [] },
+    errors:      { type: Object, default: () => ({}) },
+});
 
-            if (this.activeTab === 'pickup') {
-                formData = {
-                    activeTab: 'pickup',
-                    city: this.form.city,
-                    region: this.form.region,
-                    postOffices: this.form.postOffices,
-                    date: this.form.date,
-                    comments: this.form.comments
-                };
-            } else if (this.activeTab === 'delivery') {
-                formData = {
-                    activeTab: 'delivery',
-                    region: this.form.region,
-                    city: this.form.city,
-                    street: this.form.street,
-                    house: this.form.house,
-                    postal_code: this.form.postal_code,
-                    comments: this.form.comments
-                };
-            }
+const activeTab = ref('pickup');
 
-            Inertia.post(route('order.store.addAddress', this.token), formData, {
-                onStart: () => {
-                    console.log('Отправка началась...');
-                },
-                onSuccess: () => {
-                    console.log('Данные успешно отправлены!');
-                },
-                onError: (errors) => {
-                    console.error('Ошибка при отправке:', errors);
-                    this.errors = errors;
-                },
-                onFinish: () => {
-                    console.log('Отправка завершена.');
-                }
-            });
-        }
+const form = reactive({
+    city: '',
+    region: '',
+    postOffices: '',
+    date: '',
+    comments: '',
+    street: '',
+    house: '',
+    postal_code: '',
+});
+
+const submitForm = () => {
+    const payload = { activeTab: activeTab.value };
+    if (activeTab.value === 'pickup') {
+        Object.assign(payload, {
+            city: form.city,
+            region: form.region,
+            postOffices: form.postOffices,
+            date: form.date,
+            comments: form.comments,
+        });
+    } else {
+        Object.assign(payload, {
+            region: form.region,
+            city: form.city,
+            street: form.street,
+            house: form.house,
+            postal_code: form.postal_code,
+            comments: form.comments,
+        });
     }
 
-}
+    router.post(route('order.store.addAddress', props.token), payload, {
+        preserveScroll: true,
+        preserveState: true,
+    });
+};
 </script>
 
 <style scoped>
-.tabs ul {
-    display: flex;
-    background-color: #f3f4f6;
-    border-radius: 1rem;
-}
-
-.tabs ul li a {
-    padding: 0.75rem 1.5rem;
-    display: inline-block;
-    font-weight: 500;
-    transition: all 0.3s;
-}
-
-.tabs ul li a.bg-white {
-    background-color: #ffffff;
-    color: #4f46e5;
-    border-radius: 1rem;
-}
-
-.tabs ul li a:hover {
-    color: #4f46e5;
-}
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>

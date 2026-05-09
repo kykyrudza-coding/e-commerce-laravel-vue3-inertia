@@ -1,119 +1,101 @@
 <template>
-    <div class="w-full h-full py-12">
-        <div class="grid lg:!grid-cols-8 gap-x-3 grid-cols-1">
-            <div :class="{
-                'col-span-1 lg:col-span-8': confirmOrder,
-                'col-span-1 lg:col-span-5': !confirmOrder
-            }">
-                <div class="top-0">
-                    <ProgressBar
-                        :userCreate="userCreate"
-                        :addAddress="addAddress"
-                        :confirmOrder="confirmOrder"
-                    />
-                </div>
-                <div v-if="userCreate">
-                    <CreateUserForm
-                        :token="token"
-                        :errors="errors"
-                    />
-                </div>
-                <div v-if="addAddress">
-                    <AddAddress
-                        :errors="errors"
-                        :regions="regions"
-                        :postOffices="postOffices"
-                        :token="token"
-                        :cities="cities"
-                    />
-                </div>
-                <div v-if="confirmOrder">
-                   <ConfirmOrder
-                       :data="data"
-                       :method="method"
-                       :user="user"
-                       :token="token"
-                       :products="products"
-                       :domain="domain"
-                   />
+    <Head title="Оформлення замовлення" />
+
+    <div class="container-app py-8">
+        <!-- Breadcrumb -->
+        <nav class="flex items-center gap-2 text-sm text-surface-400 mb-8">
+            <Link :href="route('home')" class="hover:text-surface-600 transition-colors">Головна</Link>
+            <i class="ri-arrow-right-s-line"></i>
+            <Link :href="route('cart.index', { user_id: page.props.auth.user?.id || 1 })" class="hover:text-surface-600 transition-colors">Кошик</Link>
+            <i class="ri-arrow-right-s-line"></i>
+            <span class="text-surface-700 font-medium">Оформлення</span>
+        </nav>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main flow area -->
+            <div :class="confirmOrder ? 'lg:col-span-3 max-w-3xl mx-auto w-full' : 'lg:col-span-2'">
+                <ProgressBar
+                    :contactInfo="contactInfo"
+                    :addAddress="addAddress"
+                    :confirmOrder="confirmOrder"
+                />
+
+                <div class="relative min-h-[400px]">
+                    <Transition name="fade-slide" mode="out-in">
+                        <div v-if="contactInfo" key="contact">
+                            <ContactInfoForm :token="token" :errors="errors" :user="user" />
+                        </div>
+                        <div v-else-if="addAddress" key="address">
+                            <AddAddress
+                                :errors="errors"
+                                :regions="regions"
+                                :postOffices="postOffices"
+                                :token="token"
+                                :cities="cities"
+                            />
+                        </div>
+                        <div v-else-if="confirmOrder" key="confirm">
+                            <ConfirmOrder
+                                :data="data"
+                                :method="method"
+                                :user="user"
+                                :token="token"
+                                :products="products"
+                                :domain="domain"
+                            />
+                        </div>
+                    </Transition>
                 </div>
             </div>
-            <div v-if="!confirmOrder" class="col-span-1 lg:col-span-3 border rounded-xl p-2 w-full">
-                <ProductBlock :products="products" :domain="domain" />
+
+            <!-- Sticky product summary sidebar -->
+            <div v-if="!confirmOrder" class="lg:col-span-1">
+                <div class="sticky top-20">
+                    <ProductBlock :products="products" :domain="domain" />
+                </div>
             </div>
         </div>
     </div>
 </template>
 
-<script>
-import ProgressBar from "@/Components/Order/Index/ProgressBar.vue";
-import ProductBlock from "@/Components/Order/Index/ProductBlock.vue";
-import CreateUserForm from "@/Components/Order/CrearteUser/CreateUserForm.vue";
-import AddAddress from "@/Components/Order/AddAddress/AddAddress.vue";
-import ConfirmOrder from "@/Components/Order/ConfirmOrder/ConfirmOrder.vue";
+<script setup>
+import { usePage } from '@inertiajs/vue3';
+import ProgressBar from '@/Components/Order/Index/ProgressBar.vue';
+import ProductBlock from '@/Components/Order/Index/ProductBlock.vue';
+import ContactInfoForm from '@/Components/Order/ContactInfo/ContactInfoForm.vue';
+import AddAddress from '@/Components/Order/AddAddress/AddAddress.vue';
+import ConfirmOrder from '@/Components/Order/ConfirmOrder/ConfirmOrder.vue';
 
-export default {
-    name: "Index",
-    components: {ConfirmOrder, AddAddress, CreateUserForm, ProductBlock, ProgressBar},
-    props: {
-        products: {
-            type: Array,
-            required: true
-        },
-        domain: {
-            type: String,
-            required: true
-        },
-        token: {
-            type: String,
-            required: true
-        },
-        errors: {
-            type: Object,
-            default: () => ({})
-        },
-        userCreate: {
-            type: Boolean,
-            required: true
-        },
-        addAddress: {
-            type: Boolean,
-            required: true
-        },
-        confirmOrder: {
-            type: Boolean,
-            required: true
-        },
-        cities: {
-            type: Object,
-            default: () => ({})
-        },
-        regions: {
-            type: Object,
-            default: () => ({})
-        },
-        postOffices: {
-            type: Object,
-            default: () => ({})
-        },
-        data: {
-            type: Object,
-            default: () => ({})
-        },
-        method: {
-            type: Object,
-            default: () => ({})
-        },
-        user: {
-            type: Object,
-            default: () => ({})
-        }
-    },
-    watch: {
-        confirmOrder(newValue) {
-            console.log('Confirm order status changed:', newValue);
-        }
-    }
+const page = usePage();
 
-};
+defineProps({
+    products:     { type: Array, required: true },
+    domain:       { type: String, required: true },
+    token:        { type: String, required: true },
+    errors:       { type: Object, default: () => ({}) },
+    contactInfo:  { type: Boolean, required: true },
+    addAddress:   { type: Boolean, required: true },
+    confirmOrder: { type: Boolean, required: true },
+    cities:       { type: Object, default: () => ({}) },
+    regions:      { type: Object, default: () => ({}) },
+    postOffices:  { type: Object, default: () => ({}) },
+    data:         { type: Object, default: () => ({}) },
+    method:       { type: Object, default: () => ({}) },
+    user:         { type: Object, default: () => ({}) },
+});
 </script>
+
+<style scoped>
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+    transition: all 0.3s ease;
+}
+.fade-slide-enter-from {
+    opacity: 0;
+    transform: translateX(20px);
+}
+.fade-slide-leave-to {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+</style>

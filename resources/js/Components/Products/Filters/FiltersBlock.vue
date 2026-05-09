@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { Inertia } from '@inertiajs/inertia';
+import { router } from '@inertiajs/vue3';
 import BasicButton from "@/Components/Forms/BasicButton.vue";
 
 export default {
@@ -112,7 +112,7 @@ export default {
                 }
             });
 
-            Inertia.get(window.location.pathname, formattedFilters, {
+            router.get(window.location.pathname, formattedFilters, {
                 preserveState: true,
                 replace: true
             });

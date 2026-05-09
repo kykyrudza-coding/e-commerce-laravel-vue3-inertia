@@ -1,135 +1,111 @@
 <template>
-    <div class="text-center py-12">
-        <Headline text="Перевірка інформації" />
-    </div>
+    <div class="card p-6 lg:p-8 animate-fade-in">
+        <div class="mb-6">
+            <h2 class="text-xl font-bold text-surface-900 mb-1">Підтвердження замовлення</h2>
+            <p class="text-sm text-surface-500">Перевірте ваші дані та оберіть спосіб оплати</p>
+        </div>
 
-    <div class="grid grid-cols-1 sm:!grid-cols-2">
-
-        <div class="col-span-1">
-            <div class="rounded-lg shadow-lg p-4 m-4">
-                <div class="w-full">
-                    <p class="text-2xl font-mono font-bold">
-                        Замовник
-                    </p>
-                    <div class="w-full border-b my-3 border-zinc-400" />
-                    <InfoRow label="Повне Ім'я" :value="user.name" />
-                    <InfoRow label="Номер телефону" :value="user.phone" />
-                    <InfoRow label="Електронна пошта" :value="user.email" />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- User info -->
+            <div class="p-5 rounded-2xl bg-surface-50 border border-surface-100">
+                <div class="flex items-center gap-2 mb-4 text-surface-900 font-semibold">
+                    <i class="ri-user-3-line text-brand-600"></i>
+                    Замовник
                 </div>
-            </div>
-        </div>
-
-        <div class="col-span-1">
-            <div class="rounded-lg shadow-lg p-4 m-4 flex">
-                <BasicButton
-                    :disabled="!products.length"
-                    @click="processPayment"
-                    type="button"
-                    text="Оплатити картою (PayPal)"
-                />
-            </div>
-        </div>
-
-        <div class="col-span-1">
-            <div class="rounded-lg shadow-lg p-4 m-4">
-                <div class="w-full">
-                    <p class="text-2xl font-mono font-bold">
-                        Данні про доставку
-                    </p>
-                    <div class="w-full border-b my-3 border-zinc-400" />
-                    <InfoRow label="Тип доставки" :value="method.name" />
-                    <InfoRow label="Вартість доставки" :value="method.price" />
-                    <InfoRow label="Місто" :value="data.city" />
-                    <InfoRow label="Регіон" :value="data.region" />
-                    <InfoRow v-if="data.house" label="Повна адресса" :value="data.street + ' ' + data.house" />
-                    <InfoRow v-if="data.date" label="Очікувана дата доставки" :value="data.date" />
-                    <InfoRow v-if="data.postal_code" label="Поштовий Індекс" :value="data.postal_code" />
-                    <InfoRow v-if="data.postOffices" label="Поштове віділленя" :value="data.postOffices" />
-                    <InfoRow v-if="data.comments" label="Коментар" :value="data.comments" />
-                </div>
-            </div>
-        </div>
-
-        <div class="col-span-1">
-            <div class="p-6 rounded-lg space-y-4">
-                <h2 class="text-xl font-semibold text-gray-700">Ваши товари</h2>
-                <div v-for="product in products" :key="product.id" class="flex items-center space-x-4 p-4 border-b border-gray-200">
-                    <img :src="imageUrl(product.main_image)" alt="{{ product.name }}" class="w-16 h-16 object-cover rounded-lg">
-                    <div class="flex-1">
-                        <h3 class="text-lg font-medium text-gray-900">{{ product.name }}</h3>
-                        <p class="text-sm text-gray-600">${{ product.price }}</p>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-surface-500">Ім'я</span>
+                        <span class="font-medium text-surface-800">{{ user.name }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-surface-500">Телефон</span>
+                        <span class="font-medium text-surface-800">{{ user.phone }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-surface-500">Email</span>
+                        <span class="font-medium text-surface-800">{{ user.email }}</span>
                     </div>
                 </div>
-                <div class="text-right font-semibold text-lg">
-                    <span class="mx-2">Общая сумма:</span>
-                    <span class="text-indigo-600">${{ totalPrice }}</span>
+            </div>
+
+            <!-- Delivery info -->
+            <div class="p-5 rounded-2xl bg-surface-50 border border-surface-100">
+                <div class="flex items-center gap-2 mb-4 text-surface-900 font-semibold">
+                    <i class="ri-truck-line text-brand-600"></i>
+                    Доставка ({{ method.name }})
+                </div>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-surface-500">Місто</span>
+                        <span class="font-medium text-surface-800">{{ data.city }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-surface-500">Регіон</span>
+                        <span class="font-medium text-surface-800">{{ data.region }}</span>
+                    </div>
+                    <div v-if="data.house" class="flex justify-between">
+                        <span class="text-surface-500">Адреса</span>
+                        <span class="font-medium text-surface-800">{{ data.street }}, {{ data.house }}</span>
+                    </div>
+                    <div v-if="data.postOffices" class="flex justify-between">
+                        <span class="text-surface-500">Відділення</span>
+                        <span class="font-medium text-surface-800">{{ data.postOffices }}</span>
+                    </div>
+                    <div class="flex justify-between mt-2 pt-2 border-t border-surface-200">
+                        <span class="text-surface-500">Вартість доставки</span>
+                        <span class="font-medium text-brand-600">{{ formatPrice(method.price) }}</span>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <div class="border-t border-surface-100 pt-6 mt-6">
+            <div class="flex items-center justify-between mb-6">
+                <span class="text-surface-600">До сплати</span>
+                <span class="text-2xl font-bold text-surface-900">{{ formatPrice(totalPrice) }}</span>
+            </div>
+
+            <button
+                @click="processPayment"
+                :disabled="processing || !products.length"
+                class="btn-primary w-full btn-lg justify-center"
+            >
+                <i v-if="processing" class="ri-loader-4-line animate-spin"></i>
+                <i v-else class="ri-paypal-fill text-xl"></i>
+                {{ processing ? 'Обробка...' : 'Оплатити через PayPal' }}
+            </button>
+        </div>
     </div>
 </template>
 
+<script setup>
+import { ref, computed } from 'vue';
+import { router } from '@inertiajs/vue3';
+import { formatPrice } from '@/utils/helpers.js';
 
-<script>
-import Headline from "@/Components/Forms/Headline.vue";
-import BasicButton from "@/Components/Forms/BasicButton.vue";
-import InfoRow from "@/Components/Order/Index/InfoRow.vue";
-import {Inertia} from "@inertiajs/inertia";
+const props = defineProps({
+    token:    String,
+    data:     Object,
+    method:   Object,
+    products: Array,
+    user:     Object,
+    domain:   String,
+});
 
-export default {
-    name: 'ConfirmOrder',
-    components: {BasicButton, Headline, InfoRow},
-    props: {
-        token: String,
-        data: Object,
-        method: Object,
-        products: Array,
-        user: Object,
-        domain: String,
-    },
-    computed: {
-        totalPrice() {
-            const total = this.products.reduce((total, product) => total + (Number(product.price) || 0), 0) + (Number(this.method.price) || 0);
-            if (isNaN(total)) {
-                console.error("Вибачте, ми не можемо порахувати вартість вашої покупки.");
-            }
-            return total;
-        }
-    },
-    data() {
-        return {
-            activeTab: 'paypal',
-        }
-    },
-    methods: {
-        imageUrl(main_image) {
-            return main_image?.image_path ? `${this.domain}${main_image.image_path}` : '';
-        },
-        processPayment() {
-            const userData = JSON.parse(JSON.stringify(this.user));
-            const productsData = JSON.parse(JSON.stringify(this.products));
-            const deliveryData = JSON.parse(JSON.stringify(this.method));
+const processing = ref(false);
 
-            console.log('Sending payment request with data:', {
-                user: userData,
-                products: productsData,
-                delivery: deliveryData,
-                total_price: this.totalPrice
-            });
+const totalPrice = computed(() => {
+    const sum = props.products.reduce((acc, p) => acc + (Number(p.price) || 0), 0);
+    return sum + (Number(props.method.price) || 0);
+});
 
-            console.log("User data:", userData);
-            console.log("Products data:", productsData);
-            console.log("Delivery method:", deliveryData);
-            console.log("Total price:", this.totalPrice);
-
-            Inertia.post('/create-paypal-payment', {
-                user: userData,
-                products: productsData,
-                delivery: deliveryData,
-                total_price: this.totalPrice
-            });
-        }
-    }
-}
+const processPayment = () => {
+    processing.value = true;
+    router.post('/create-paypal-payment', {
+        user: props.user,
+        products: props.products,
+        delivery: props.method,
+        total_price: totalPrice.value
+    });
+};
 </script>
