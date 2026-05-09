@@ -1,25 +1,34 @@
 <template>
     <Head title="Каталог товарів" />
 
+    <!-- Ambient Background -->
+    <div class="fixed inset-0 z-[-1] bg-surface-50 overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-[800px] bg-gradient-to-b from-brand-100/50 via-indigo-50/30 to-transparent"></div>
+        <div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-brand-400/20 rounded-full blur-[120px] mix-blend-multiply animate-pulse-slow"></div>
+        <div class="absolute top-[20%] right-[-10%] w-[40%] h-[60%] bg-indigo-400/20 rounded-full blur-[120px] mix-blend-multiply animate-pulse-slower"></div>
+    </div>
+
     <div class="container-app py-8">
         <!-- Breadcrumb -->
         <nav class="flex items-center gap-2 text-sm text-surface-400 mb-6" aria-label="Breadcrumb">
-            <Link :href="route('home')" class="hover:text-surface-600 transition-colors">Головна</Link>
+            <Link :href="route('home')" class="hover:text-brand-600 transition-colors">Головна</Link>
             <i class="ri-arrow-right-s-line"></i>
-            <span class="text-surface-700 font-medium">Каталог</span>
+            <span class="text-surface-900 font-bold">Каталог</span>
         </nav>
 
-        <h1 class="page-title mb-1">Каталог товарів</h1>
-        <p class="page-subtitle mb-8">Знайдіть ідеальний пристрій для вас</p>
+        <div class="mb-8">
+            <h1 class="text-4xl md:text-5xl font-black text-surface-900 tracking-tight mb-2">Каталог товарів</h1>
+            <p class="text-surface-500 font-medium">Знайдіть ідеальний пристрій для вас</p>
+        </div>
 
-        <div class="flex gap-6">
+        <div class="flex flex-col lg:flex-row gap-6">
             <!-- Sidebar filters (desktop) -->
             <aside
                 class="hidden lg:block flex-shrink-0 transition-all duration-300 overflow-hidden"
                 :style="filtersVisible ? 'width: 280px; opacity: 1' : 'width: 0; opacity: 0'"
                 aria-label="Фільтри"
             >
-                <div class="card sticky top-20">
+                <div class="bg-white/70 backdrop-blur-xl border border-white rounded-[2rem] shadow-xl shadow-brand-500/5 sticky top-24">
                     <ProductFilters :filters-options="filtersOptions" />
                 </div>
             </aside>
@@ -32,13 +41,15 @@
                     :show-filter="true"
                     @toggle-filters="toggleFilters"
                 />
-                <AppPagination
-                    :current-page="currentPage"
-                    :last-page="lastPage"
-                    :total="total"
-                    :per-page="perPage"
-                    @page-changed="handlePageChange"
-                />
+                <div class="mt-10">
+                    <AppPagination
+                        :current-page="currentPage"
+                        :last-page="lastPage"
+                        :total="total"
+                        :per-page="perPage"
+                        @page-changed="handlePageChange"
+                    />
+                </div>
             </div>
         </div>
     </div>
@@ -48,15 +59,14 @@
         <Transition name="drawer">
             <div
                 v-if="mobileFiltersOpen"
-                class="fixed inset-0 z-50 lg:hidden"
-                @click.self="mobileFiltersOpen = false"
+                class="fixed inset-0 z-[100] lg:hidden"
             >
-                <div class="absolute inset-0 bg-surface-950/50 backdrop-blur-sm"></div>
-                <div class="absolute left-0 top-0 bottom-0 w-80 bg-white shadow-2xl overflow-y-auto">
-                    <div class="flex items-center justify-between p-4 border-b border-surface-100">
-                        <h2 class="font-semibold text-surface-900">Фільтри</h2>
-                        <button @click="mobileFiltersOpen = false" class="btn-icon">
-                            <i class="ri-close-line text-lg"></i>
+                <div class="absolute inset-0 bg-surface-950/40 backdrop-blur-sm" @click="mobileFiltersOpen = false"></div>
+                <div class="absolute left-0 top-0 bottom-0 w-[85%] max-w-[320px] bg-white/95 backdrop-blur-2xl shadow-2xl overflow-y-auto border-r border-white/50">
+                    <div class="flex items-center justify-between p-6 border-b border-surface-200">
+                        <h2 class="font-black text-xl text-surface-900">Фільтри</h2>
+                        <button @click="mobileFiltersOpen = false" class="w-10 h-10 rounded-xl bg-surface-100 flex items-center justify-center text-surface-600 hover:bg-brand-50 hover:text-brand-600 transition-colors">
+                            <i class="ri-close-line text-xl"></i>
                         </button>
                     </div>
                     <ProductFilters :filters-options="filtersOptions" />
