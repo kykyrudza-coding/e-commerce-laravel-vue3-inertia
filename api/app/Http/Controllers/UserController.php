@@ -4,24 +4,42 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Resources\UserResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function user(Request $request)
+    public function user(Request $request): JsonResponse
     {
-        return new UserResource($request->user());
+        $user = $request->user();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => new UserResource($user),
+        ]);
     }
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
-        return new UserResource($request->user()->load('orders'));
+        $user = $request->user()->load('orders');
+
+        return response()->json([
+            'status' => 'success',
+            'data' => new UserResource($user),
+        ]);
     }
 
-    public function update(UserUpdateRequest $request)
+    public function update(UserUpdateRequest $request): JsonResponse
     {
-        $request->user()->update($request->validated());
+        $validated = $request->validated();
 
-        return new UserResource($request->user()->refresh());
+        $request->user()->update($validated);
+
+        $user = $request->user()->refresh();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => new UserResource($user),
+        ]);
     }
 }

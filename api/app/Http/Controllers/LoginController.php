@@ -5,33 +5,47 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
-    public function store(LoginUserRequest $request)
+    public function store(LoginUserRequest $request): JsonResponse
     {
-        $user = User::where('email', $request->email)->first();
+        $data = $request->validated();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        $user = User::query()
+            ->where('email', $data['email'])
+            ->first();
+
+        if (! Hash::check($data['password'], $user->password)) {
             throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
+                'email' => ['The provided credentials are incorrect.'],
             ]);
         }
 
+        $token = $user->createToken($request->userAgent() ?: 'frontend')->plainTextToken;
+
         return response()->json([
-            'message' => 'Authenticated.',
-            'token' => $user->createToken($request->userAgent() ?: 'frontend')->plainTextToken,
-            'data' => new UserResource($user),
+            'status' => 'success',
+            'data' => [
+                'user' => new UserResource($user),
+                'token' => $token,
+            ]
         ]);
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
-        $request->user()?->currentAccessToken()?->delete();
+        $request->user()
+            ->currentAccessToken()
+            ->delete();
 
-        return response()->json(['message' => 'Logged out.']);
+        return response()->json([
+            'status' => 'success',
+            'data' => null,
+        ]);
     }
 }

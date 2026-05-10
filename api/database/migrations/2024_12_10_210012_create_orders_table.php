@@ -25,8 +25,6 @@ return new class extends Migration
                 'cancelled'
             ])->default('pending');
 
-            $table->index('status', 'custom_orders_status_index');
-
             $table->string('payment_method')->nullable();
             $table->string('transaction_id')->nullable();
 

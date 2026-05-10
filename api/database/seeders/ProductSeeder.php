@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Color;
 use App\Models\Product;
 use App\Models\ProductImage;
-use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
 {
@@ -14,9 +13,27 @@ class ProductSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        $colors = Color::pluck('name')->toArray();
-
-        $ram = [64, 128, 256, 512];
+        $colors = ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Pink', 'Gold', 'Silver', 'Gray'];
+        $screenSizes = ['4"', '6.1"', '8"', '12"'];
+        $screenTypes = ['LCD', 'OLED', 'AMOLED', 'TFT', 'Retina'];
+        $operatingSystems = ['Android', 'iOS'];
+        $processors = [
+            'A13 Bionic',
+            'A14 Bionic',
+            'A15 Bionic',
+            'Snapdragon 888',
+            'Snapdragon 865',
+            'Snapdragon 8 Gen 2',
+            'Exynos 2100',
+            'Exynos 2200',
+            'Dimensity 1200',
+            'Dimensity 9000',
+        ];
+        $ram = ['64GB', '128GB', '256GB', '512GB'];
+        $storage = ['4GB', '8GB', '12GB', '24GB', '32GB', '48GB', '96GB', '128GB'];
+        $cameraResolutions = ['8MP', '12MP', '24MP', '48MP', '96MP'];
+        $batteryCapacities = array_map(fn (int $capacity) => "{$capacity}mAh", range(1000, 5800, 200));
+        $conditions = ['New', 'Used', 'Refurbished'];
 
         $names = [
             'iPhone 14', 'Galaxy S23', 'Pixel 7', 'Redmi Note 12', 'iPhone 14 Pro',
@@ -47,22 +64,24 @@ class ProductSeeder extends Seeder
         foreach (range(1, 100) as $index) {
             $product = Product::create([
                 'category_id' => $faker->numberBetween(3, 16),
-                'name' => $names[$currentIndex] . ' ' . $faker->randomElement($ram) . 'GB ' . $faker->randomElement($colors),
+                'name' => $names[$currentIndex] . ' ' . $faker->randomElement($ram) . ' ' . $faker->randomElement($colors),
                 'description' => $faker->sentence(50),
                 'price' => $faker->randomFloat(0, 1000, 2000),
                 'stock' => $faker->numberBetween(10, 50),
                 'slug' => $faker->slug,
-                'brand_id' => $faker->numberBetween(1, 9),
-                'screen_size_id' => $faker->numberBetween(1, 4),
-                'screen_type_id' => $faker->numberBetween(1, 5),
-                'os_id' => $faker->numberBetween(2, 3),
-                'processor_id' => $faker->numberBetween(1, 10),
-                'ram_id' => $faker->numberBetween(1, 4),
-                'storage_id' => $faker->numberBetween(1, 8),
-                'camera_resolution_id' => $faker->numberBetween(1, 5),
-                'battery_capacity_id' => $faker->numberBetween(1, 25),
-                'color_id' => $faker->numberBetween(1, 11),
-                'condition_id' => $faker->numberBetween(1, 3),
+                'brand_id' => $faker->numberBetween(1, 10),
+                'specifications' => [
+                    'screen_size' => $faker->randomElement($screenSizes),
+                    'screen_type' => $faker->randomElement($screenTypes),
+                    'os' => $faker->randomElement($operatingSystems),
+                    'processor' => $faker->randomElement($processors),
+                    'ram' => $faker->randomElement($ram),
+                    'storage' => $faker->randomElement($storage),
+                    'camera_resolution' => $faker->randomElement($cameraResolutions),
+                    'battery_capacity' => $faker->randomElement($batteryCapacities),
+                    'color' => $faker->randomElement($colors),
+                    'condition' => $faker->randomElement($conditions),
+                ],
             ]);
 
             $currentIndex++;

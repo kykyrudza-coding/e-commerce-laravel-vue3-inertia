@@ -5,31 +5,35 @@ namespace App\Http\Controllers;
 use App\Http\Resources\CartResource;
 use App\Models\Cart;
 use App\Models\Product;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response;
 
 class CartController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
-        return CartResource::collection(
-            Cart::query()
-                ->with(['product.main_image', 'product.category'])
-                ->where('user_id', $request->user()->id)
-                ->get()
-        );
+        $items = Cart::query()
+            ->with(['product.main_image', 'product.category'])
+            ->where('user_id', $request->user()->id)
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => CartResource::collection($items),
+        ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
             'product_id' => ['required', 'exists:products,id'],
             'quantity' => ['nullable', 'integer', 'min:1'],
         ]);
 
-        $product = Product::findOrFail($data['product_id']);
+        $product = Product::query()->findOrFail($data['product_id']);
 
-        $cartItem = Cart::firstOrNew([
+        $cartItem = Cart::query()->firstOrNew([
             'user_id' => $request->user()->id,
             'product_id' => $product->id,
         ]);
@@ -37,16 +41,23 @@ class CartController extends Controller
         $cartItem->quantity = $cartItem->exists
             ? $cartItem->quantity + ($data['quantity'] ?? 1)
             : ($data['quantity'] ?? 1);
+
         $cartItem->save();
 
-        return (new CartResource($cartItem->load(['product.main_image', 'product.category'])))
-            ->response()
-            ->setStatusCode(Response::HTTP_CREATED);
+        $cartItem->load(['product.main_image', 'product.category']);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => new CartResource($cartItem),
+        ]);
     }
 
-    public function update(Request $request, Cart $item)
+    public function update(Request $request, Cart $item): JsonResponse
     {
-        abort_unless($item->user_id === $request->user()->id, Response::HTTP_FORBIDDEN);
+        abort_unless(
+            $item->user_id === $request->user()->id,
+            Response::HTTP_FORBIDDEN
+        );
 
         $data = $request->validate([
             'quantity' => ['required', 'integer', 'min:1'],
@@ -54,22 +65,36 @@ class CartController extends Controller
 
         $item->update($data);
 
-        return new CartResource($item->load(['product.main_image', 'product.category']));
+        $item->load(['product.main_image', 'product.category']);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => new CartResource($item),
+        ]);
     }
 
-    public function destroy(Request $request, Cart $item)
+    public function destroy(Request $request, Cart $item): JsonResponse
     {
-        abort_unless($item->user_id === $request->user()->id, Response::HTTP_FORBIDDEN);
+        abort_unless(
+            $item->user_id === $request->user()->id,
+            Response::HTTP_FORBIDDEN
+        );
 
         $item->delete();
 
-        return response()->noContent();
+        return response()->json([
+            'status' => 'success',
+        ]);
     }
 
-    public function clear(Request $request)
+    public function clear(Request $request): JsonResponse
     {
-        Cart::where('user_id', $request->user()->id)->delete();
+        Cart::query()
+            ->where('user_id', $request->user()->id)
+            ->delete();
 
-        return response()->noContent();
+        return response()->json([
+            'status' => 'success',
+        ]);
     }
 }

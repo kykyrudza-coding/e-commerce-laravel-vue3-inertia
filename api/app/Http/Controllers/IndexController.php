@@ -3,32 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class IndexController extends Controller
 {
-    public function index()
+    public function index(Request $request): JsonResponse
     {
         $region = 'Fortress';
 
         return response()->json([
-            'most_sold_in_store' => Product::most_sold_in_store(4),
-            'most_sold_in_region' => Product::most_sold_in_region($region, 4),
-            'region' => $region,
+            'status' => 'success',
+            'data' => [
+                'most_sold_in_store' => Product::mostSoldInStore(4),
+                'most_sold_in_region' => Product::mostSoldInRegion($region, 4),
+                'region' => $region,
+            ]
         ]);
-    }
-
-    public function faq()
-    {
-        return response()->json(['data' => []]);
-    }
-
-    public function contact()
-    {
-        return response()->json(['data' => []]);
-    }
-
-    public function about()
-    {
-        return response()->json(['data' => []]);
     }
 }

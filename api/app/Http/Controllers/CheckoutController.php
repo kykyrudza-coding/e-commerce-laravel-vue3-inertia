@@ -2,47 +2,75 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Order\CheckoutStoreRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Cart;
 use App\Models\Order;
-use App\Models\OrderItem;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Throwable;
 
 class CheckoutController extends Controller
 {
-    public function store(Request $request)
+    /**
+     * @throws Throwable
+     */
+    public function store(CheckoutStoreRequest $request): JsonResponse
     {
+        $data = $request->validated();
+        $user = $request->user();
+
         $cartItems = Cart::query()
             ->with('product')
-            ->where('user_id', $request->user()->id)
+            ->where('user_id', $user->id)
             ->get();
 
-        abort_if($cartItems->isEmpty(), Response::HTTP_UNPROCESSABLE_ENTITY, 'Cart is empty.');
-
-        $order = Order::create([
-            'user_id' => $request->user()->id,
-            'order_token' => (string) Str::uuid(),
-            'status' => 'pending',
-            'payment_method' => $request->input('payment_method', 'manual'),
-            'notes' => $request->input('notes'),
-            'total_price' => $cartItems->sum(fn ($item) => $item->product->price * $item->quantity),
-        ]);
-
-        foreach ($cartItems as $item) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $item->product_id,
-                'quantity' => $item->quantity,
-                'price' => $item->product->price,
+        if ($cartItems->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Your cart is empty.',
+                'data' => null,
             ]);
         }
 
-        Cart::where('user_id', $request->user()->id)->delete();
+        $order = DB::transaction(function () use ($data, $user, $cartItems) {
+            $order = Order::query()
+                ->create([
+                    'user_id' => $user->id,
+                    'order_token' => (string) Str::uuid(),
+                    'status' => 'pending',
+                    'payment_method' => $data['payment_method'] ?? 'manual',
+                    'notes' => $data['notes'] ?? null,
+                    'total_price' => $cartItems->sum(
+                        fn ($item) => $item->product->price * $item->quantity
+                    ),
+                ]);
 
-        return (new OrderResource($order->load(['items.product', 'delivery_address'])))
-            ->response()
-            ->setStatusCode(Response::HTTP_CREATED);
+            foreach ($cartItems as $item) {
+                $order->items()
+                    ->create([
+                        'product_id' => $item->product_id,
+                        'quantity' => $item->quantity,
+                        'price' => $item->product->price,
+                    ]);
+            }
+
+            Cart::query()
+                ->where('user_id', $user->id)
+                ->delete();
+
+            return $order;
+        });
+
+        $order->load([
+            'items.product',
+            'delivery_address',
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => new OrderResource($order),
+        ]);
     }
 }

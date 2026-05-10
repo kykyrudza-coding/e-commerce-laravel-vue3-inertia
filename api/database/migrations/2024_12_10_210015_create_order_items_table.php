@@ -21,7 +21,7 @@ return new class extends Migration
 
             $table->unsignedSmallInteger('quantity')
                 ->default(1);
-            $table->decimal('price', 10)
+            $table->decimal('price', 10, 2)
                 ->default(0);
 
             $table->timestamps();
