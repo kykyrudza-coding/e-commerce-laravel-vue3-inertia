@@ -6,7 +6,6 @@ use App\Http\Requests\CreateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class RegisterController extends Controller
@@ -20,11 +19,10 @@ class RegisterController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        Auth::login($user);
-        $request->session()->regenerate();
-
-        return (new UserResource($user))
-            ->response()
-            ->setStatusCode(Response::HTTP_CREATED);
+        return response()->json([
+            'message' => 'Registered.',
+            'token' => $user->createToken($request->userAgent() ?: 'frontend')->plainTextToken,
+            'data' => new UserResource($user),
+        ], Response::HTTP_CREATED);
     }
 }
