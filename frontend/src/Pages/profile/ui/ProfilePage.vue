@@ -200,7 +200,7 @@ const form = reactive({
 
 const submitForm = () => {
     saving.value = true;
-    router.post(route('user.update'), form, {
+    router.put(route('user.update'), form, {
         preserveScroll: true,
         onSuccess: () => {
             successMessage.value = 'Дані успішно збережено!';

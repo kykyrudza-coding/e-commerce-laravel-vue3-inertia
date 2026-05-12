@@ -52,7 +52,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import api, { apiErrors } from '@/shared/api';
 
 export default {
     name: 'ReviewModal',
@@ -99,14 +99,15 @@ export default {
                 review: this.form.review
             };
 
-            axios.post(`/products/${this.productId}/review-add`, data)
+            api.post(`/products/${this.productId}/reviews`, data)
                 .then(response => {
                     alert('Отзыв успешно добавлен!');
                     this.$emit('close');
                 })
                 .catch(error => {
-                    if (error.response && error.response.data.errors) {
-                        const errors = error.response.data.errors;
+                    const errors = apiErrors(error);
+
+                    if (Object.keys(errors).length) {
                         this.formErrors = {
                             rating: errors.rating ? errors.rating[0] : '',
                             review: errors.review ? errors.review[0] : ''

@@ -208,7 +208,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import api from '@/shared/api';
+import api, { apiData, apiErrors, apiMeta } from '@/shared/api';
 import { useCart } from '@/features/cart/add-to-cart';
 import { imageUrl, formatPrice } from '@/shared/lib';
 import ProductDetailsSkeleton from './ProductDetailsSkeleton.vue';
@@ -247,8 +247,9 @@ const fetchProduct = async () => {
     try {
         const productId = props.id || routeParams.params.id;
         const response = await api.get(`/products/${productId}`);
-        product.value = response.data.data;
-        characteristics.value = response.data.characteristics || {};
+        const meta = apiMeta(response);
+        product.value = apiData(response, {});
+        characteristics.value = meta.characteristics || {};
         reviews.value = product.value.reviews || [];
         domain.value = import.meta.env.VITE_API_ORIGIN || '';
         activeImage.value = sortedImages.value[0] ?? null;
@@ -282,12 +283,12 @@ const submitReview = async () => {
             rating: reviewForm.rating,
             comment: reviewForm.comment,
         });
-        reviews.value = [response.data.data, ...reviews.value];
+        reviews.value = [apiData(response), ...reviews.value];
         reviewModalOpen.value = false;
         reviewForm.rating = 5;
         reviewForm.comment = '';
     } catch (error) {
-        reviewForm.errors = error.response?.data?.errors || {};
+        reviewForm.errors = apiErrors(error);
     } finally {
         reviewForm.processing = false;
     }

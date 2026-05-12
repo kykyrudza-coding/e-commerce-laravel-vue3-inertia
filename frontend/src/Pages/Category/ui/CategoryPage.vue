@@ -43,7 +43,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import api from '@/shared/api';
+import api, { apiData, apiMeta, apiPayload } from '@/shared/api';
 import { ProductGrid } from '@/widgets/product-catalog';
 import { AppPagination } from '@/features/products/paginate-products';
 
@@ -70,12 +70,17 @@ const domain = ref(props.domain || import.meta.env.VITE_API_ORIGIN || 'http://lo
 const fetchCategory = async (page = 1) => {
     const id = props.id || routeParams.params.id;
     const response = await api.get(`/categories/${id}/products`, { params: { page } });
-    category.value = response.data.category?.data || response.data.category || {};
-    products.value = response.data.data;
-    currentPage.value = response.data.meta?.current_page ?? page;
-    lastPage.value = response.data.meta?.last_page ?? 1;
-    total.value = response.data.meta?.total ?? products.value.length;
-    perPage.value = response.data.meta?.per_page ?? 15;
+    const payload = apiPayload(response);
+    const data = apiData(response, {});
+    const meta = apiMeta(response);
+    const productList = data.products?.data ?? data.products ?? data ?? [];
+
+    category.value = data.category?.data || data.category || payload.category?.data || payload.category || {};
+    products.value = Array.isArray(productList) ? productList : Object.values(productList);
+    currentPage.value = meta.current_page ?? page;
+    lastPage.value = meta.last_page ?? 1;
+    total.value = meta.total ?? products.value.length;
+    perPage.value = meta.per_page ?? 15;
 };
 
 onMounted(() => fetchCategory());

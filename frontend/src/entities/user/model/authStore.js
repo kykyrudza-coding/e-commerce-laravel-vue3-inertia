@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import api, { clearAuthToken, setAuthToken } from '@/shared/api';
+import api, { apiData, apiErrors, clearAuthToken, setAuthToken } from '@/shared/api';
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -11,7 +11,7 @@ export const useAuthStore = defineStore('auth', {
         async fetchUser() {
             try {
                 const response = await api.get('/user');
-                this.user = response.data.data;
+                this.user = apiData(response);
             } catch {
                 this.user = null;
             }
@@ -22,11 +22,12 @@ export const useAuthStore = defineStore('auth', {
 
             try {
                 const response = await api.post('/login', credentials);
-                setAuthToken(response.data.token);
-                this.user = response.data.data;
+                const session = apiData(response, {});
+                setAuthToken(session.token);
+                this.user = session.user;
                 return response;
             } catch (error) {
-                this.errors = error.response?.data?.errors || {};
+                this.errors = apiErrors(error);
                 throw error;
             } finally {
                 this.loading = false;
@@ -38,11 +39,12 @@ export const useAuthStore = defineStore('auth', {
 
             try {
                 const response = await api.post('/register', payload);
-                setAuthToken(response.data.token);
-                this.user = response.data.data;
+                const session = apiData(response, {});
+                setAuthToken(session.token);
+                this.user = session.user;
                 return response;
             } catch (error) {
-                this.errors = error.response?.data?.errors || {};
+                this.errors = apiErrors(error);
                 throw error;
             } finally {
                 this.loading = false;

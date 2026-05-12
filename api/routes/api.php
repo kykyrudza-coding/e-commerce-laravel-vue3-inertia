@@ -4,12 +4,14 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\IndexController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\OrderController;
+use App\Modules\Order\Presentation\Http\Controllers\OrderController;
 use App\Http\Controllers\PayPalController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\UserController;
+use App\Modules\Product\Presentation\Http\Controllers\ProductController;
+use App\Modules\User\Auth\Presentation\Http\Controllers\ForgotPasswordController;
+use App\Modules\User\Auth\Presentation\Http\Controllers\LoginController;
+use App\Modules\User\Auth\Presentation\Http\Controllers\RegisterController;
+use App\Modules\User\Auth\Presentation\Http\Controllers\ResetPasswordController;
+use App\Modules\User\Profile\Presentation\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/home', [IndexController::class, 'index']);
@@ -26,12 +28,14 @@ Route::get('/categories/{category}/products', [CategoryController::class, 'produ
 
 Route::post('/register', [RegisterController::class, 'store']);
 Route::post('/login', [LoginController::class, 'store']);
+Route::post('/password/email', [ForgotPasswordController::class, 'store']);
+Route::post('/password/reset', [ResetPasswordController::class, 'reset']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout']);
-    Route::get('/user', [UserController::class, 'user']);
-    Route::get('/profile', [UserController::class, 'index']);
-    Route::put('/profile', [UserController::class, 'update']);
+    Route::get('/user', [ProfileController::class, 'user']);
+    Route::get('/profile', [ProfileController::class, 'index']);
+    Route::put('/profile', [ProfileController::class, 'update']);
 
     Route::get('/cart', [CartController::class, 'index']);
     Route::post('/cart/items', [CartController::class, 'store']);

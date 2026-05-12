@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import api from '@/shared/api';
+import api, { apiData } from '@/shared/api';
 
 export const useCartStore = defineStore('cart', {
     state: () => ({
@@ -11,7 +11,7 @@ export const useCartStore = defineStore('cart', {
             this.loading = true;
             try {
                 const response = await api.get('/cart');
-                this.items = response.data.data;
+                this.items = apiData(response, []);
             } finally {
                 this.loading = false;
             }

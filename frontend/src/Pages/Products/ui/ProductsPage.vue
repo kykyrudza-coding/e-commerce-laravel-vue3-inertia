@@ -81,7 +81,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import api from '@/shared/api';
+import api, { apiData, apiMeta } from '@/shared/api';
 import { ProductGrid } from '@/widgets/product-catalog';
 import { ProductFilters } from '@/features/products/filter-products';
 import { AppPagination } from '@/features/products/paginate-products';
@@ -105,12 +105,13 @@ const fetchProducts = async (page = 1) => {
 
     try {
         const response = await api.get('/products', { params: { page } });
-        products.value = response.data.data;
-        currentPage.value = response.data.meta?.current_page ?? page;
-        lastPage.value = response.data.meta?.last_page ?? 1;
-        total.value = response.data.meta?.total ?? products.value.length;
-        perPage.value = response.data.meta?.per_page ?? 15;
-        filtersOptions.value = response.data.filters ?? {};
+        const meta = apiMeta(response);
+        products.value = apiData(response, []);
+        currentPage.value = meta.current_page ?? page;
+        lastPage.value = meta.last_page ?? 1;
+        total.value = meta.total ?? products.value.length;
+        perPage.value = meta.per_page ?? 15;
+        filtersOptions.value = meta.filters ?? {};
         domain.value = import.meta.env.VITE_API_ORIGIN || '';
     } finally {
         isLoading.value = false;

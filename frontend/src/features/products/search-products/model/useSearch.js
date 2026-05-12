@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue';
 import { router } from '@/shared/lib/spa-compat';
-import axios from 'axios';
+import api, { apiData } from '@/shared/api';
 
 const isSearchOpen = ref(false);
 const query = ref('');
@@ -34,8 +34,8 @@ export function useSearch() {
 
         debounceTimer = setTimeout(async () => {
             try {
-                const response = await axios.get('/search', { params: { query: query.value } });
-                results.value = response.data.results ?? [];
+                const response = await api.get('/search', { params: { query: query.value } });
+                results.value = apiData(response, []);
             } catch {
                 results.value = [];
             } finally {

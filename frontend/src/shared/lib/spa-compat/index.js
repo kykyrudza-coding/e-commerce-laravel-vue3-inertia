@@ -1,6 +1,6 @@
 import { reactive } from 'vue';
 import { RouterLink } from 'vue-router';
-import api, { clearAuthToken, setAuthToken } from '@/shared/api';
+import api, { apiData, apiErrors, clearAuthToken, setAuthToken } from '@/shared/api';
 import appRouter from '@/app/router';
 
 export const Link = RouterLink;
@@ -36,7 +36,7 @@ export function usePage() {
 export async function bootstrapAuth() {
     try {
         const response = await api.get('/user');
-        pageState.props.auth.user = response.data.data;
+        pageState.props.auth.user = apiData(response);
     } catch {
         pageState.props.auth.user = null;
     }
@@ -78,12 +78,14 @@ export function useForm(initialState = {}) {
                 ? await api.delete(url)
                 : await api[method](url, payload);
 
-            if (response.data?.data && ['/login', '/register'].includes(url)) {
-                if (response.data.token) {
-                    setAuthToken(response.data.token);
+            const responseData = apiData(response);
+
+            if (responseData && ['/login', '/register'].includes(url)) {
+                if (responseData.token) {
+                    setAuthToken(responseData.token);
                 }
 
-                pageState.props.auth.user = response.data.data;
+                pageState.props.auth.user = responseData.user;
             }
 
             if (url === '/logout') {
@@ -94,7 +96,7 @@ export function useForm(initialState = {}) {
             options.onSuccess?.(response);
             return response;
         } catch (error) {
-            form.errors = normalizeErrors(error.response?.data?.errors || {});
+            form.errors = normalizeErrors(apiErrors(error));
             options.onError?.(form.errors);
             return error.response;
         } finally {

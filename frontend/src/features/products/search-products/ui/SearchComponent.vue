@@ -56,8 +56,8 @@
 </template>
 
 <script>
-import axios from "axios";
 import debounce from "lodash/debounce";
+import api, { apiData } from '@/shared/api';
 
 export default {
     name: "SearchComponent",
@@ -108,8 +108,8 @@ export default {
             this.loading = true;
 
             try {
-                const response = await axios.get(`/search?query=${this.searchQuery}`);
-                this.searchResults = response.data.results;
+                const response = await api.get('/search', { params: { query: this.searchQuery } });
+                this.searchResults = apiData(response, []);
             } catch (error) {
                 console.error('Помилка пошуку:', error);
             } finally {

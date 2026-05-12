@@ -18,10 +18,13 @@ class ResetPasswordEmail extends Mailable
 
     public function build(): ResetPasswordEmail
     {
-        $resetLink = url(route('password.reset', 'token={token}&email={email}', [
-            'token' => $this->token,
-            'email' => $this->user->email,
-        ]));
+        $frontendUrl = rtrim((string) env('FRONTEND_URL', config('app.url')), '/');
+        $resetLink = sprintf(
+            '%s/password/reset/%s?email=%s',
+            $frontendUrl,
+            urlencode($this->token),
+            urlencode($this->user->email),
+        );
 
         return $this->subject('Скидання пароля')
             ->view('emails.reset_password')
@@ -31,5 +34,4 @@ class ResetPasswordEmail extends Mailable
             ]);
     }
 }
-
 

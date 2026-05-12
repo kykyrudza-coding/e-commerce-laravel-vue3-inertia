@@ -91,7 +91,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import api from '@/shared/api';
+import api, { apiData } from '@/shared/api';
 import { formatPrice } from '@/shared/lib';
 
 const props = defineProps({
@@ -109,7 +109,7 @@ const totalAmount = computed(() =>
 
 const fetchCart = async () => {
     const response = await api.get('/cart');
-    products.value = response.data.data.map((item) => ({
+    products.value = apiData(response, []).map((item) => ({
         ...item.product,
         quantity: item.quantity,
     }));

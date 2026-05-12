@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import api from '@/shared/api';
+import api, { apiData, apiMeta } from '@/shared/api';
 
 export const useProductsStore = defineStore('products', {
     state: () => ({
@@ -13,9 +13,10 @@ export const useProductsStore = defineStore('products', {
             this.loading = true;
             try {
                 const response = await api.get('/products', { params });
-                this.products = response.data.data;
-                this.pagination = response.data.meta || {};
-                this.filters = response.data.filters || {};
+                const meta = apiMeta(response);
+                this.products = apiData(response, []);
+                this.pagination = meta;
+                this.filters = meta.filters || {};
                 return response;
             } finally {
                 this.loading = false;

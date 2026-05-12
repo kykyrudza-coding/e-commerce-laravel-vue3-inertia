@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\HttpCodeEnum;
 use App\Http\Requests\Order\CheckoutStoreRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Cart;
 use App\Models\Order;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -27,11 +29,10 @@ class CheckoutController extends Controller
             ->get();
 
         if ($cartItems->isEmpty()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Your cart is empty.',
-                'data' => null,
-            ]);
+            return ApiResponse::error(
+                message: 'Your cart is empty.',
+                code: HttpCodeEnum::BAD_REQUEST,
+            );
         }
 
         $order = DB::transaction(function () use ($data, $user, $cartItems) {
@@ -42,6 +43,7 @@ class CheckoutController extends Controller
                     'status' => 'pending',
                     'payment_method' => $data['payment_method'] ?? 'manual',
                     'notes' => $data['notes'] ?? null,
+                    'currency' => 'USD',
                     'total_price' => $cartItems->sum(
                         fn ($item) => $item->product->price * $item->quantity
                     ),
@@ -68,9 +70,9 @@ class CheckoutController extends Controller
             'delivery_address',
         ]);
 
-        return response()->json([
-            'status' => 'success',
-            'data' => new OrderResource($order),
-        ]);
+        return ApiResponse::success(
+            data: (new OrderResource($order))->resolve($request),
+            message: 'Order created successfully.',
+        );
     }
 }

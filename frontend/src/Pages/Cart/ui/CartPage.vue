@@ -106,7 +106,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import api from '@/shared/api';
+import api, { apiData } from '@/shared/api';
 import { imageUrl, formatPrice } from '@/shared/lib';
 
 const props = defineProps({
@@ -127,7 +127,7 @@ const state = reactive({
 
 const fetchCart = async () => {
     const response = await api.get('/cart');
-    state.products = response.data.data.map((item) => ({
+    state.products = apiData(response, []).map((item) => ({
         ...item.product,
         cart_item_id: item.id,
         quantity: item.quantity || 1,
